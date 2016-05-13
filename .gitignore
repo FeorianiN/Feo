@@ -1,0 +1,1382 @@
+// Maximenko4.cpp
+#include "stdafx.h"
+#include <wchar.h>
+#include <Windows.h>
+#include <stdlib.h>
+#include <math.h>
+#include <conio.h>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <stdio.h>
+#include <string>
+#include <locale.h>
+
+using namespace std;
+
+int pole[10][10], tempmas[10][10];
+int cvet, Hod11, Hod33;
+char Hod[4];
+int bel[16] = { 5, 4, 3, 2, 1, 3, 4, 5, 6, 6, 6, 6, 6, 6, 6, 6 };
+int cher[16] = { 16, 16, 16, 16, 16, 16, 16, 16, 15, 14, 13, 12, 11, 13, 14, 15 };
+int ncher, nbel;
+int flag;
+int bx = 1, by = 4, cx = 8, cy = 4;
+int FlagShah = 1;
+const char Figura_white[6] = { '1', '1', '1', '1', '1', '1' };
+const char Figura_black[6] = { '1', '1', '1', '1', '1', '1' };
+
+
+int Shah(int Hod2, int Hod11, int cvet);
+
+void inputpole(void)
+{
+	int i, j;
+	float x;
+	HDC hDC = GetDC(GetConsoleWindow());
+	HPEN Pen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
+	SelectObject(hDC, Pen);
+	MoveToEx(hDC, 60, 60, NULL);
+
+	LineTo(hDC, 540, 60);
+	LineTo(hDC, 540, 540);
+	LineTo(hDC, 60, 540);
+	LineTo(hDC, 60, 60);
+
+	for (j = 0; j < 8; j = j++)
+		for (i = 0; i < 8; i = i + 2)
+			if (j % 2 == 0) {
+				Rectangle(hDC, (i + 1) * 60, (j + 1) * 60, (i + 2) * 60, (j + 2) * 60);
+			}
+			else
+				Rectangle(hDC, (i + 2) * 60, (j + 1) * 60, (i + 3) * 60, (j + 2) * 60);
+
+	system("pause");
+}
+
+void King(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33)
+{
+	// Проверка перемещения короля(на 1 клетку в любую сторону)
+	if (((Hod4 == Hod2) && (Hod33 == Hod11 - 1)) || ((Hod4 == Hod2) && (Hod33 == Hod11 + 1)) || ((Hod4 == Hod2 - 1) && (Hod33 == Hod11 - 1))
+		|| ((Hod4 == Hod2 - 1) && (Hod33 == Hod11 + 1)) || ((Hod4 == Hod2 - 1) && (Hod33 == Hod11)) || ((Hod4 == Hod2 + 1) && (Hod33 == Hod11 - 1))
+		|| ((Hod4 == Hod2 + 1) && (Hod33 == Hod11 + 1)) || ((Hod4 == Hod2 + 1) && (Hod33 == Hod11)))
+	{
+		// Проверка на возможность нахождения в конечной клетке своих фигур
+		if (cvet1 == 1)
+		{
+			if ((pole[Hod4][Hod33] >= 2) && (pole[Hod4][Hod33] <= 6))
+			{
+				printf("  Неверный ввод ! ");
+			}
+		}
+		if (cvet1 == 0)
+		{
+			if ((pole[Hod4][Hod33] >= 12) && (pole[Hod4][Hod33] <= 16))
+			{
+				printf("  Неверный ввод ! ");
+			}
+		}
+		if (pole[Hod4][Hod33] == 0)
+		{
+			// Освобождаем то место ОТКУДА мы походили
+			pole[Hod2][Hod11] = 0;
+			if (cvet1 == 1)
+			{
+				// и присваиваем значение соответственно белого (цвет = 1) короля клетке КУДА мы походили
+				pole[Hod4][Hod33] = 1;
+				bx = Hod4;
+				by = Hod33;
+				cvet = 0; // переход хода
+				return;
+			}
+			if (cvet1 == 0)
+			{
+				// и присваиваем значение чёрного (цвет = 0) короля
+				pole[Hod4][Hod33] = 11;
+				cx = Hod4;
+				cy = Hod33;
+				cvet = 1; // переход хода
+				return;
+			}
+		}
+		// Если а клетке, КУДА мы походили, стоит фигура другого игрока
+		if (cvet1 == 0)
+		{
+			if ((pole[Hod4][Hod33] >= 2) && (pole[Hod4][Hod33] <= 6))
+			{
+				pole[Hod4][Hod33] = 11;
+				pole[Hod2][Hod11] = 0;
+				cx = Hod4;
+				cy = Hod33;
+				nbel = nbel - 1;
+				cvet = 1; // переход хода
+				return;
+			}
+		}
+		if (cvet1 == 1)
+		{
+			if ((pole[Hod4][Hod33] >= 12) && (pole[Hod4][Hod33] <= 16))
+			{
+				pole[Hod4][Hod33] = 1;
+				pole[Hod2][Hod11] = 0;
+				bx = Hod4;
+				by = Hod33;
+				ncher = ncher - 1;
+				cvet = 0; // переход хода
+				return;
+			}
+		}
+	}
+	else
+	{
+		printf("  Неверный ход ");
+	}
+}
+
+void Queen(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33)
+{
+	int i, j;
+
+	flag = 0;
+	if (Hod2 == Hod4)
+	{
+		if (Hod33 > Hod11)
+			for (i = (Hod11 + 1); i <= (Hod33 - 1); i++)
+			{
+				if (pole[Hod2][i] != 0)
+				{
+					flag = 1;
+				}
+			}
+		else
+			for (i = (Hod33 + 1); i <= (Hod11 - 1); i++)
+			{
+				if (pole[Hod2][i] != 0)
+				{
+					flag = 1;
+				}
+			}
+	}
+	if (Hod11 == Hod33)
+	{
+		if (Hod4 > Hod2)
+			for (i = (Hod2 + 1); i <= (Hod4 - 1); i++)
+			{
+				if (pole[i][Hod11] != 0)
+				{
+					flag = 1;
+				}
+			}
+		else
+			for (i = (Hod4 + 1); i <= (Hod2 - 1); i++)
+			{
+				if (pole[i][Hod11] != 0)
+				{
+					flag = 1;
+				}
+			}
+	}
+	if ((Hod4 < Hod2) && (Hod33 > Hod11))
+	{
+		j = Hod11 + 1;
+		for (i = Hod2 - 1; i > Hod4; i = i - 1)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j + 1;
+		}
+	}
+	if ((Hod4 > Hod2) && (Hod33 > Hod11))
+	{
+		j = Hod11 + 1;
+		for (i = Hod2 + 1; i < Hod4; i++)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j + 1;
+		}
+	}
+	if ((Hod4 > Hod2) && (Hod33 < Hod11))
+	{
+		j = Hod11 - 1;
+		for (i = Hod2 + 1; i < Hod4; i++)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j - 1;
+		}
+	}
+	if ((Hod4 < Hod2) && (Hod33 < Hod11))
+	{
+		j = Hod11 - 1;
+		for (i = Hod2 - 1; i > Hod4; i = i - 1)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j - 1;
+		}
+	}
+
+	if (flag == 0)
+	{
+		// Королева ходит и по диагонали и по прямым линиям
+		if (((abs(Hod4 - Hod2) == abs(Hod33 - Hod11))) || ((Hod33 > Hod11) && (Hod2 > Hod4) && (abs(Hod4 - Hod2) == abs(Hod33 - Hod11)))
+			|| ((Hod11 > Hod33) && (Hod2 > Hod4) && (abs(Hod4 - Hod2) == abs(Hod33 - Hod11))) || (Hod4 == Hod2) || (Hod33 == Hod11))
+		{
+			// Проверка на возможность того, что там уже стоит наша фигура
+			if (cvet1 == 1)
+			{
+				if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+				{
+					printf("  Неверный ввод ! "); system("Pause");
+				}
+			}
+			if (cvet1 == 0)
+			{
+				if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+				{
+					printf("  Неверный ввод ! "); system("Pause");
+				}
+			}
+			if (pole[Hod4][Hod33] == 0)
+			{
+				// Освобождаем то место ОТКУДА мы походили
+				pole[Hod2][Hod11] = 0;
+				if (cvet1 == 1)
+				{
+					// и присваиваем значение соответственно белой (цвет = 1) королевы в клетку КУДА мы походили
+					pole[Hod4][Hod33] = 2;
+					cvet = 0; // переход хода
+					return;
+				}
+				if (cvet1 == 0)
+				{
+					// и присваиваем значение белой (цвет = 0) королевы
+					pole[Hod4][Hod33] = 12;
+					cvet = 1; // переход хода
+					return;
+				}
+			}
+			// Если а клетке, КУДА мы походили, стоит фигура другого игрока
+			if (cvet1 == 0)
+			{
+				if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+				{
+					pole[Hod4][Hod33] = 12;
+					pole[Hod2][Hod11] = 0;
+					nbel = nbel - 1;
+					cvet = 1; // переход хода
+					return;
+				}
+			}
+			if (cvet1 == 1)
+			{
+				if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+				{
+					pole[Hod4][Hod33] = 2;
+					pole[Hod2][Hod11] = 0;
+					ncher = ncher - 1;
+					cvet = 0; // переход хода
+					return;
+				}
+			}
+		}
+		else
+		{
+			printf("  Неверный ход ");  system("Pause");
+		}
+	}
+	else
+	{
+		printf("  Неверный ход ");  system("Pause");
+	}
+}
+
+void Bishop(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33)
+{
+	int i, j;
+
+	flag = 0;
+	if ((Hod4 < Hod2) && (Hod33 > Hod11))
+	{
+		j = Hod11 + 1;
+		for (i = Hod2 - 1; i > Hod4; i = i - 1)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j + 1;
+		}
+	}
+	if ((Hod4 > Hod2) && (Hod33 > Hod11))
+	{
+		j = Hod11 + 1;
+		for (i = Hod2 + 1; i < Hod4; i++)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j + 1;
+		}
+	}
+	if ((Hod4 > Hod2) && (Hod33 < Hod11))
+	{
+		j = Hod11 - 1;
+		for (i = Hod2 + 1; i < Hod4; i++)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j - 1;
+		}
+	}
+	if ((Hod4 < Hod2) && (Hod33 < Hod11))
+	{
+		j = Hod11 - 1;
+		for (i = Hod2 - 1; i > Hod4; i = i - 1)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j - 1;
+		}
+	}
+
+	if (flag == 0)
+	{
+		// Проверка хода слона(по диагонали)
+		if (((abs(Hod4 - Hod2) == abs(Hod33 - Hod11))) || ((Hod33 > Hod11) && (Hod2 > Hod4) && (abs(Hod4 - Hod2) == abs(Hod33 - Hod11)))
+			|| ((Hod11 > Hod33) && (Hod2 > Hod4) && (abs(Hod4 - Hod2) == abs(Hod33 - Hod11))))
+		{
+			// Проверка на возможность того, что там уже стоит наша фигура
+			if (cvet1 == 1)
+			{
+				if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+				{
+					printf("  Неверный ввод ! ");  system("Pause");
+				}
+			}
+			if (cvet1 == 0)
+			{
+				if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+				{
+					printf("  Неверный ввод ! ");  system("Pause");
+				}
+			}
+			if (pole[Hod4][Hod33] == 0)
+			{
+				// Освобождаем то место ОТКУДА мы походили
+				pole[Hod2][Hod11] = 0;
+				if (cvet1 == 1)
+				{
+					// и присваиваем значение соответственно белого (цвет = 1) офицера в клетку КУДА мы походили
+					pole[Hod4][Hod33] = 3;
+					cvet = 0; // переход хода
+					return;
+				}
+				if (cvet1 == 0)
+				{
+					// и присваиваем значение чёрного (цвет = 0) офицера
+					pole[Hod4][Hod33] = 13;
+					cvet = 1; // переход хода
+					return;
+				}
+			}
+			// Если а клетке, КУДА мы походили, стоит фигура другого игрока
+			if (cvet1 == 0)
+			{
+				if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+				{
+					pole[Hod4][Hod33] = 13;
+					pole[Hod2][Hod11] = 0;
+					nbel = nbel - 1;
+					cvet = 1; // переход хода
+					return;
+				}
+			}
+			if (cvet1 == 1)
+			{
+				if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+				{
+					pole[Hod4][Hod33] = 3;
+					pole[Hod2][Hod11] = 0;
+					ncher = ncher - 1;
+					cvet = 0; // переход хода
+					return;
+				}
+			}
+		}
+		else
+		{
+			printf("  Неверный ход ");  system("Pause");
+		}
+	}
+	else
+	{
+		printf("  Неверный ход ");  system("Pause");
+	}
+}
+
+void Horse(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33)
+{
+	// Это проверка на то, может ли вообще конь переместиться туда(это шаги "буквой "Г"")
+	if (((Hod4 == Hod2 - 2) && (Hod33 == Hod11 - 1)) || ((Hod4 == Hod2 - 2) && (Hod33 == Hod11 + 1)) || ((Hod4 == Hod2 - 1) && (Hod33 == Hod11 + 2))
+		|| ((Hod4 == Hod2 + 1) && (Hod33 == Hod11 + 2)) || ((Hod4 == Hod2 - 1) && (Hod33 == Hod11 - 2)) || ((Hod4 == Hod2 + 1) && (Hod33 == Hod11 - 2))
+		|| ((Hod4 == Hod2 + 2) && (Hod33 == Hod11 - 1)) || ((Hod4 == Hod2 + 2) && (Hod33 == Hod11 + 1)))
+	{
+		// Проверка на возможность того, что там уже стоит наша фигура
+		if (cvet1 == 1)
+		{
+			if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+			{
+				printf("  Неверный ввод ! ");  system("Pause");
+			}
+		}
+		if (cvet1 == 0)
+		{
+			if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+			{
+				printf("  Неверный ввод ! ");  system("Pause");
+			}
+		}
+		if (pole[Hod4][Hod33] == 0)
+		{
+			// Освобождаем то место ОТКУДА мы походили
+			pole[Hod2][Hod11] = 0;
+			if (cvet1 == 1)
+			{
+				// и присваиваем значение соответственно белого (цвет = 1) коня
+				pole[Hod4][Hod33] = 4;
+				cvet = 0; // переход хода
+				return;
+			}
+			if (cvet1 == 0)
+			{
+				// и присваиваем значение чёрного (цвет = 0) коня
+				pole[Hod4][Hod33] = 14;
+				cvet = 1; // переход хода
+				return;
+			}
+		}
+		// Если а клетке, КУДА мы походили, стоит фигура другого игрока
+		if (cvet1 == 0)
+		{
+			if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+			{
+				pole[Hod4][Hod33] = 14;
+				pole[Hod2][Hod11] = 0;
+				nbel = nbel - 1;
+				cvet = 1; // переход хода
+				return;
+			}
+		}
+		if (cvet1 == 1)
+		{
+			if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+			{
+				pole[Hod4][Hod33] = 4;
+				pole[Hod2][Hod11] = 0;
+				ncher = ncher - 1;
+				cvet = 0; // переход хода
+				return;
+			}
+		}
+	}
+	else
+	{
+		printf("  Неверный ход ");  system("Pause");
+	}
+}
+
+void Rook(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33)
+{
+	int i;
+
+	flag = 0;
+	if (Hod2 == Hod4)
+	{
+		if (Hod33 > Hod11)
+			for (i = (Hod11 + 1); i <= (Hod33 - 1); i++)
+			{
+				if (pole[Hod2][i] != 0)
+				{
+					flag = 1;
+				}
+			}
+		else
+			for (i = (Hod33 + 1); i <= (Hod11 - 1); i++)
+			{
+				if (pole[Hod2][i] != 0)
+				{
+					flag = 1;
+				}
+			}
+	}
+	if (Hod11 == Hod33)
+	{
+		if (Hod4 > Hod2)
+			for (i = (Hod2 + 1); i <= (Hod4 - 1); i++)
+			{
+				if (pole[i][Hod11] != 0)
+				{
+					flag = 1;
+				}
+			}
+		else
+			for (i = (Hod4 + 1); i <= (Hod2 - 1); i++)
+			{
+				if (pole[i][Hod11] != 0)
+				{
+					flag = 1;
+				}
+			}
+	}
+
+	if (flag == 0)
+	{
+		// Проверка хода ладьи(столбец или строка)
+		if ((Hod4 == Hod2) || (Hod33 == Hod11))
+		{
+			// Проверка на возможность того, что там уже стоит наша фигура
+			if (cvet1 == 1)
+			{
+				if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+				{
+					printf("  Неверный ввод ! ");  system("Pause");
+				}
+			}
+			if (cvet1 == 0)
+			{
+				if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+				{
+					printf("  Неверный ввод ! ");  system("Pause");
+				}
+			}
+			if (pole[Hod4][Hod33] == 0)
+			{
+				// Освобождаем то место ОТКУДА мы походили
+				pole[Hod2][Hod11] = 0;
+				if (cvet1 == 1)
+				{
+					// и присваиваем значение соответственно белой (цвет = 1) ладьи в клетку КУДА мы походили
+					pole[Hod4][Hod33] = 5;
+					cvet = 0; // переход хода
+					return;
+				}
+				if (cvet1 == 0)
+				{
+					// и присваиваем значение чёрной (цвет = 0) ладьи
+					pole[Hod4][Hod33] = 15;
+					cvet = 1; // переход хода
+					return;
+				}
+			}
+			// Если а клетке, КУДА мы походили, стоит фигура другого игрока
+			if (cvet1 == 0)
+			{
+				if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+				{
+					pole[Hod4][Hod33] = 15;
+					pole[Hod2][Hod11] = 0;
+					nbel = nbel - 1;
+					cvet = 1; // переход хода
+					return;
+				}
+			}
+			if (cvet1 == 1)
+			{
+				if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+				{
+					pole[Hod4][Hod33] = 5;
+					pole[Hod2][Hod11] = 0;
+					ncher = ncher - 1;
+					cvet = 0; // переход хода
+					return;
+				}
+			}
+		}
+		else
+		{
+			printf("  Неверный ход ");  system("Pause");
+		}
+	}
+	else
+	{
+		printf("  Неверный ход ");  system("Pause");
+	}
+}
+
+void Pawn(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33)
+{
+	// Проверка уничтожения пешкой фигуры противника
+	// Если на клетке, что стоит на одну клетку по диагонали от пешки, есть фигура другого игрока, то..
+	if (Hod11 != Hod33)
+	{
+		if (cvet1 == 1)
+		{
+			if ((((Hod33 - Hod11) == 1) && ((Hod4 - Hod2) == 1)) || (((Hod11 - Hod33) == 1) && ((Hod4 - Hod2) == 1)))
+			{
+				if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+				{
+					pole[Hod4][Hod33] = 6;
+					pole[Hod2][Hod11] = 0;
+					ncher = ncher - 1;
+					cvet = 0; // переход хода
+					return;
+				}
+			}
+		}
+		if (cvet1 == 0)
+		{
+			if ((((Hod33 - Hod11) == 1) && ((Hod2 - Hod4) == 1)) || (((Hod2 - Hod4) == 1)) && ((Hod11 - Hod33) == 1))
+			{
+				if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+				{
+					pole[Hod4][Hod33] = 16;
+					pole[Hod2][Hod11] = 0;
+					nbel = nbel - 1;
+					cvet = 1; // переход хода
+					return;
+				}
+			}
+		}
+	}
+	else
+	{
+		// Проверка перемещения пешки
+		if (cvet1 == 1)
+		{
+			if (Hod2 == 2)
+			{
+				if ((Hod33 == Hod11) && ((Hod4 == Hod2 + 1) || (Hod4 == Hod2 + 2)))
+				{
+					// Проверка на возможность того, что там уже стоит наша фигура
+					if (cvet1 == 1)
+					{
+						if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+						{
+							printf("  Неверный ввод ! ");  system("Pause");
+							return;
+						}
+					}
+					if (cvet1 == 0)
+					{
+						if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+						{
+							printf("  Неверный ввод ! ");  system("Pause");
+							return;
+						}
+					}
+
+					// Освобождаем то место ОТКУДА мы походили
+					pole[Hod2][Hod11] = 0;
+					if (cvet1 == 1)
+					{
+						// и присваиваем значение соответственно белой (цвет = 1) пешки в клетку КУДА мы походили
+						pole[Hod4][Hod33] = 6;
+						cvet = 0; // переход хода
+						return;
+					}
+					if (cvet1 == 0)
+					{
+						// и присваиваем значение чёрной (цвет = 0) пешки
+						pole[Hod4][Hod33] = 16;
+						cvet = 1; // переход хода
+						return;
+					}
+				}
+				else
+				{
+					printf("  Неверный ход ");  system("Pause");
+				}
+			}
+			else
+			{
+				if ((Hod33 == Hod11) && (Hod4 == Hod2 + 1))
+				{
+					// Проверка на возможность того, что там уже стоит наша фигура
+					if (cvet1 == 1)
+					{
+						if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+						{
+							printf("  Неверный ввод ! ");  system("Pause");
+						}
+					}
+					if (cvet1 == 0)
+					{
+						if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+						{
+							printf("  Неверный ввод ! ");  system("Pause");
+						}
+					}
+					// Освобождаем то место ОТКУДА мы походили
+					pole[Hod2][Hod11] = 0;
+					if (cvet1 == 1)
+					{
+						// и присваиваем значение соответственно белой (цвет = 1) пешки в клетку КУДА мы походили
+						pole[Hod4][Hod33] = 6;
+						cvet = 0; // переход хода
+						return;
+					}
+					if (cvet1 == 0)
+					{
+						// и присваиваем значение чёрной (цвет = 0) пешки
+						pole[Hod4][Hod33] = 16;
+						cvet = 1; // переход хода
+						return;
+					}
+				}
+				else
+				{
+					printf("  Неверный ход ");  system("Pause");
+				}
+			}
+		}
+		else
+		{
+			if (Hod2 == 7)
+			{
+				if ((Hod33 == Hod11) && ((Hod4 == Hod2 - 1) || (Hod4 == Hod2 - 2)))
+				{
+					// Проверка на возможность того, что там уже стоит наша фигура
+					if (cvet1 == 1)
+					{
+						if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+						{
+							printf("  Неверный ввод ! ");  system("Pause");
+						}
+					}
+					if (cvet1 == 0)
+					{
+						if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+						{
+							printf("  Неверный ввод ! ");  system("Pause");
+						}
+					}
+					// Освобождаем то место ОТКУДА мы походили
+					pole[Hod2][Hod11] = 0;
+					if (cvet1 == 1)
+					{
+						// и присваиваем значение соответственно белой (цвет = 1) пешки в клетку КУДА мы походили
+						pole[Hod4][Hod33] = 6;
+						cvet = 0; // переход хода
+						return;
+					}
+					if (cvet1 == 0)
+					{
+						// и присваиваем значение чёрной (цвет = 0) пешки
+						pole[Hod4][Hod33] = 16;
+						cvet = 1; // переход хода
+						return;
+					}
+				}
+				else
+				{
+					printf("  Неверный ход ");  system("Pause");
+				}
+			}
+			else
+			{
+				if ((Hod33 == Hod11) && (Hod4 == Hod2 - 1))
+				{
+					// Проверка на возможность того, что там уже стоит наша фигура
+					if (cvet1 == 1)
+					{
+						if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+						{
+							printf("  Неверный ввод ! ");  system("Pause");
+						}
+					}
+					if (cvet1 == 0)
+					{
+						if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+						{
+							printf("  Неверный ввод ! ");  system("Pause");
+						}
+					}
+					// Освобождаем то место ОТКУДА мы походили
+					pole[Hod2][Hod11] = 0;
+					if (cvet1 == 1)
+					{
+						// и присваиваем значение соответственно белой (цвет = 1) пешки в клетку КУДА мы походили
+						pole[Hod4][Hod33] = 6;
+						cvet = 0; // переход хода
+						return;
+					}
+					if (cvet1 == 0)
+					{
+						// и присваиваем значение чёрной (цвет = 0) пешки
+						pole[Hod4][Hod33] = 16;
+						cvet = 1; // переход хода
+						return;
+					}
+				}
+				else
+				{
+					printf("  Неверный ход ");  system("Pause");
+				}
+			}
+		}
+	}
+}
+
+void Chek(int cvet, char Hod1, int Hod2, char Hod3, int Hod4)
+{
+	int flag_shah = 0;
+	// Тут мы преобразовываем буквы в цифры для ориентировки по массиву
+	if (Hod1 == 'A')
+	{
+		Hod11 = 1;
+	}
+	if (Hod1 == 'B')
+	{
+		Hod11 = 2;
+	}
+	if (Hod1 == 'C')
+	{
+		Hod11 = 3;
+	}
+	if (Hod1 == 'D')
+	{
+		Hod11 = 4;
+	}
+	if (Hod1 == 'E')
+	{
+		Hod11 = 5;
+	}
+	if (Hod1 == 'F')
+	{
+		Hod11 = 6;
+	}
+	if (Hod1 == 'G')
+	{
+		Hod11 = 7;
+	}
+	if (Hod1 == 'H')
+	{
+		Hod11 = 8;
+	}
+	if (Hod3 == 'A')
+	{
+		Hod33 = 1;
+	}
+	if (Hod3 == 'B')
+	{
+		Hod33 = 2;
+	}
+	if (Hod3 == 'C')
+	{
+		Hod33 = 3;
+	}
+	if (Hod3 == 'D')
+	{
+		Hod33 = 4;
+	}
+	if (Hod3 == 'E')
+	{
+		Hod33 = 5;
+	}
+	if (Hod3 == 'F')
+	{
+		Hod33 = 6;
+	}
+	if (Hod3 == 'G')
+	{
+		Hod33 = 7;
+	}
+	if (Hod3 == 'H')
+	{
+		Hod33 = 8;
+	}
+	//printf("%d", Hod11);
+	//printf("%d", Hod2);
+	//printf("%d", Hod33);
+	//printf("%d", Hod4);
+	//putchar('\n');
+	// Перенаправления на фигуры + проверка хода ( на предмет введения какой-либо ерунды )
+	if (((Hod11 >= 1) && (Hod11 <= 8)) && ((Hod2 >= 1) && (Hod2 <= 8)) && ((Hod33 >= 1) && (Hod33 <= 8)) && ((Hod4 >= 1) && (Hod4 <= 8)))
+	{
+		if ((cvet == 1) && ((pole[Hod2][Hod11] >= 1) && (pole[Hod2][Hod11] <= 6))) // белые фигуры ( цвет = 1 )
+		{
+			// проверка на шах 
+
+
+			if (pole[Hod2][Hod11] == 1)
+			{
+				King(Hod2, Hod11, 1, Hod4, Hod33);
+			}
+			if (pole[Hod2][Hod11] == 2)
+			{
+				Queen(Hod2, Hod11, 1, Hod4, Hod33);
+			}
+			if (pole[Hod2][Hod11] == 3)
+			{
+				Bishop(Hod2, Hod11, 1, Hod4, Hod33);
+			}
+			if (pole[Hod2][Hod11] == 4)
+			{
+				Horse(Hod2, Hod11, 1, Hod4, Hod33);
+			}
+			if (pole[Hod2][Hod11] == 5)
+			{
+				Rook(Hod2, Hod11, 1, Hod4, Hod33);
+			}
+			if (pole[Hod2][Hod11] == 6)
+			{
+				Pawn(Hod2, Hod11, 1, Hod4, Hod33);
+			}
+		}
+		if ((cvet == 0) && ((pole[Hod2][Hod11] >= 11) && (pole[Hod2][Hod11] <= 16))) // чёрные фигуры ( цвет = 0 )
+		{
+			if (pole[Hod2][Hod11] == 11)
+			{
+				King(Hod2, Hod11, 0, Hod4, Hod33);
+			}
+			if (pole[Hod2][Hod11] == 12)
+			{
+				Queen(Hod2, Hod11, 0, Hod4, Hod33);
+			}
+			if (pole[Hod2][Hod11] == 13)
+			{
+				Bishop(Hod2, Hod11, 0, Hod4, Hod33);
+			}
+			if (pole[Hod2][Hod11] == 14)
+			{
+				Horse(Hod2, Hod11, 0, Hod4, Hod33);
+			}
+			if (pole[Hod2][Hod11] == 15)
+			{
+				Rook(Hod2, Hod11, 0, Hod4, Hod33);
+			}
+			if (pole[Hod2][Hod11] == 16)
+			{
+				Pawn(Hod2, Hod11, 0, Hod4, Hod33);
+			}
+		}
+	}
+	getchar();
+}
+
+void OutputFigure(void)
+{
+	int m, n;
+	printf("   A   B   C   D   E   F   G   H \n");
+	for (m = 1; m <= 8; m++) {
+		printf("%d", m, "     ");
+		for (n = 1; n <= 8; n++) {
+			printf("%3d ", pole[m][n]);
+		}
+		printf("\n");
+	}
+
+}
+
+
+int Shah(int Hod2, int Hod11, int cvet)
+{
+	int x, y;
+	// шах
+	FlagShah = 0;
+	if (cvet == 1)
+	{
+		if ((pole[Hod2 + 1][Hod11 - 1] == 16) || (pole[Hod2 + 1][Hod11 + 1] == 16))
+		{
+			FlagShah = 1;
+		}
+		if ((pole[Hod2 - 2][Hod11 - 1] == 14) || (pole[Hod2 - 2][Hod11 + 1] == 14) || (pole[Hod2 - 1][Hod11 + 2] == 14) || (pole[Hod2 + 1][Hod11 + 2] == 14)
+			|| (pole[Hod2 + 2][Hod11 - 1] == 14) || (pole[Hod2 + 2][Hod11 + 1] == 14) || (pole[Hod2 - 1][Hod11 - 2] == 14) || (pole[Hod2 + 1][Hod11 - 2] == 14))
+		{
+			FlagShah = 1;
+		}
+		x = Hod2 + 1;
+		y = Hod11 + 1;
+		while ((pole[x][y] == 0) && ((x <= 8) && (y <= 8)))
+		{
+			x++;
+			y++;
+		}
+		if ((pole[x][y] == 13) || (pole[x][y] == 12))
+		{
+			FlagShah = 1;
+		}
+		x = Hod2 + 1;
+		y = Hod11 - 1;
+		while ((pole[x][y] == 0) && ((x <= 8) && (y >= 1)))
+		{
+			x++;
+			y--;
+		}
+		if ((pole[x][y] == 13) || (pole[x][y] == 12))
+		{
+			FlagShah = 1;
+		}
+		x = Hod2 - 1;
+		y = Hod11 - 1;
+		while ((pole[x][y] == 0) && ((x >= 1) && (y >= 1)))
+		{
+			x--;
+			y--;
+		}
+		if ((pole[x][y] == 13) || (pole[x][y] == 12))
+		{
+			FlagShah = 1;
+		}
+		x = Hod2 - 1;
+		y = Hod11 + 1;
+		while ((pole[x][y] == 0) && ((x >= 1) && (y <= 8)))
+		{
+			x--;
+			y++;
+		}
+		if ((pole[x][y] == 13) || (pole[x][y] == 12))
+		{
+			FlagShah = 1;
+		}
+		x = Hod2;y = Hod11 + 1;
+		while ((y <= 8) && (pole[x][y] == 0))
+		{
+			y++;
+		}
+		if ((pole[x][y] == 15) || (pole[x][y] == 12))
+		{
+			FlagShah = 1;
+		}
+
+		y = Hod11 - 1;
+		while ((y >= 1) && (pole[x][y] == 0))
+		{
+			y--;
+		}
+		if ((pole[x][y] == 15) || (pole[x][y] == 12))
+		{
+			FlagShah = 1;
+		}
+
+		y = Hod11;
+		x = Hod2 - 1;
+		while ((x >= 1) && (pole[x][y] == 0))
+		{
+			x--;
+		}
+
+		if ((pole[x][y] == 15) || (pole[x][y] == 12))
+		{
+			FlagShah = 1;
+		}
+
+		x = Hod2 + 1;
+		while ((x <= 8) && (pole[x][y] == 0))
+		{
+			x++;
+		}
+		if ((pole[x][y] == 15) || (pole[x][y] == 12))
+		{
+			FlagShah = 1;
+		}
+
+	}
+	if ((FlagShah == 1) && (cvet == 1))
+	{
+		//puts("  Шах белому королю  ");
+		//system("pause");
+		return(FlagShah);
+	}
+	if (cvet == 0)
+	{
+		if ((pole[Hod2 - 1][Hod11 - 1] == 6) || (pole[Hod2 - 1][Hod11 + 1] == 6))
+		{
+			FlagShah = 2;
+		}
+		if ((pole[Hod2 - 2][Hod11 - 1] == 4) || (pole[Hod2 - 2][Hod11 + 1] == 4) || (pole[Hod2 - 1][Hod11 + 2] == 4) || (pole[Hod2 + 1][Hod11 + 2] == 4)
+			|| (pole[Hod2 + 2][Hod11 - 1] == 4) || (pole[Hod2 + 2][Hod11 + 1] == 4) || (pole[Hod2 - 1][Hod11 - 2] == 4) || (pole[Hod2 + 1][Hod11 - 2] == 4))
+		{
+			FlagShah = 2;
+		}
+		x = Hod2 + 1;
+		y = Hod11 + 1;
+		while ((pole[x][y] == 0) && ((x <= 8) && (y <= 8)))
+		{
+			x++;
+			y++;
+		}
+		if ((pole[x][y] == 3) || (pole[x][y] == 2))
+		{
+			FlagShah = 2;
+		}
+		x = Hod2 + 1;
+		y = Hod11 - 1;
+		while ((pole[x][y] == 0) && ((x <= 8) && (y >= 1)))
+		{
+			x++;
+			y--;
+		}
+		if ((pole[x][y] == 3) || (pole[x][y] == 2))
+		{
+			FlagShah = 2;
+		}
+		x = Hod2 - 1;
+		y = Hod11 - 1;
+		while ((pole[x][y] == 0) && ((x >= 1) && (y >= 1)))
+		{
+			x--;
+			y--;
+		}
+		if ((pole[x][y] == 3) || (pole[x][y] == 2))
+		{
+			FlagShah = 2;
+		}
+		x = Hod2 - 1;
+		y = Hod11 + 1;
+		while ((pole[x][y] == 0) && ((x >= 1) && (y <= 8)))
+		{
+			x--;
+			y++;
+		}
+		if ((pole[x][y] == 3) || (pole[x][y] == 2))
+		{
+			FlagShah = 2;
+		}
+
+		x = Hod2;y = Hod11 + 1;
+		while ((y <= 8) && (pole[x][y] == 0))
+		{
+			y++;
+		}
+		if ((pole[x][y] == 5) || (pole[x][y] == 2))
+		{
+			FlagShah = 2;
+		}
+
+		y = Hod11 - 1;
+		while ((y >= 1) && (pole[x][y] == 0))
+		{
+			y--;
+		}
+		if ((pole[x][y] == 5) || (pole[x][y] == 2))
+		{
+			FlagShah = 2;
+		}
+
+		y = Hod11;
+		x = Hod2 - 1;
+		while ((x >= 1) && (pole[x][y] == 0))
+		{
+			x--;
+		}
+
+		if ((pole[x][y] == 5) || (pole[x][y] == 2))
+		{
+			FlagShah = 2;
+		}
+
+		x = Hod2 + 1;
+		while ((x <= 8) && (pole[x][y] == 0))
+		{
+			x++;
+		}
+		if ((pole[x][y] == 5) || (pole[x][y] == 2))
+		{
+			FlagShah = 2;
+		}
+	}
+	if ((FlagShah == 2) && (cvet == 0))
+	{
+		//puts("  Шах чёрному королю  ");
+		//system("pause");
+		return(FlagShah);
+	}
+	return(0);
+}
+
+
+void figure(void)
+{
+	int m, n, z;
+	int bel[16] = { 5, 4, 3, 1, 2, 3, 4, 5, 6, 6, 6, 6, 6, 6, 6, 6 };
+	int cher[16] = { 16, 16, 16, 16, 16, 16, 16, 16, 15, 14, 13, 11, 12, 13, 14, 15 };
+
+	// счётчик количества фигур определённого цвета
+	nbel = 16;
+	ncher = 16;
+
+	for (m = 0; m <= 9; m++) {
+		for (n = 0; n <= 9; n++) {
+			pole[m][n] = 0;
+		}
+	}
+	// Это первоначальные расстановки соответственно белых фигур 
+	z = 0;
+	for (m = 1; m <= 2; m++) {
+		for (n = 1; n <= 8; n++) {
+			pole[m][n] = bel[z];
+			z++;
+		}
+	}
+	// чёрных фигур
+	z = 0;
+	for (m = 7; m <= 8; m++) {
+		for (n = 1; n <= 8; n++) {
+			pole[m][n] = cher[z];
+			z++;
+		}
+	}
+	OutputFigure();
+
+	// вывод
+}
+void tempm(void)
+{
+	int n, m;
+	for (m = 0; m <= 9; m++) {
+		for (n = 0; n <= 9; n++) {
+			tempmas[m][n] = pole[m][n];
+		}
+	}
+}
+void mtemp(void)
+{
+	int n, m;
+	for (m = 0; m <= 9; m++) {
+		for (n = 0; n <= 9; n++) {
+			pole[m][n] = tempmas[m][n];
+		}
+	}
+}
+
+int Mat(int x, int y, int cv)
+{
+	int n, m;
+	for (m = 1; m <= 8; m++) 
+	{
+		for (n = 1; n <= 8; n++) 
+		{
+		}
+	}
+	return 1;
+}
+
+int main()
+{
+	int a, b, fl, temp_bx, temp_by, temp_cx, temp_cy;
+	char str[2];
+	setlocale(LC_ALL, "RUS");
+
+	HANDLE hCon = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+		if (hCon != INVALID_HANDLE_VALUE) {
+			CONSOLE_FONT_INFOEX cfi;
+			cfi.cbSize = sizeof(CONSOLE_FONT_INFOEX);
+			cfi.nFont = 0;
+			cfi.dwFontSize.X = 0;
+			cfi.dwFontSize.Y = 12;
+			cfi.FontFamily = FF_DONTCARE;
+			cfi.FontWeight = 800;
+			wcscpy_s(cfi.FaceName, L"Chess-7");
+			SetCurrentConsoleFontEx(hCon, FALSE, &cfi);
+		}
+//	printf("%c",0x6B);
+
+//	system("pause");
+	//inputpole();
+	figure();
+	cvet = 1;
+label1:
+	while (cvet == 1)
+	{
+		printf("Ход белых  ");
+		// ввод хода
+		str[0] = getchar();
+		if ((str[0] == 'q') || (str[0] == 'Q'))
+		{
+			printf("Победа черных!");
+			system("Pause");
+			return 0;
+		}
+		a = getchar();
+		str[1] = getchar();
+		b = getchar();
+		//	_getch();
+		tempm();//запомнить массив
+		temp_bx = bx;
+		temp_by = by;
+		Chek(cvet, str[0], a - 48, str[1], b - 48);//ход
+		FlagShah = Shah(bx, by, 1); // шах
+		if (FlagShah == 1)
+		{
+			printf("Неверный ход! Шах сохраняется!");
+			system("Pause");
+			mtemp(); cvet = 1; //вернуть массив
+			bx = temp_bx;
+			by = temp_by;
+		}
+		else if (Shah(cx, cy, 0)==2)
+		{
+			printf("Шах черному королю!");
+			system("Pause");
+			cvet = 0;
+		}
+		system("cls");
+		OutputFigure();
+	}
+
+	while (cvet == 0)
+	{
+		printf("Ход чёрных  ");
+		// ввод хода
+
+		str[0] = getchar();
+		if ((str[0] == 'q') || (str[0] == 'Q'))
+		{
+			printf("Победа белых!");
+			system("Pause");
+			return 0;
+		}
+		a = getchar();
+		str[1] = getchar();
+		b = getchar();
+		//	_getch();
+		tempm();
+		temp_cx = cx;
+		temp_cy = cy;
+		Chek(cvet, str[0], a - 48, str[1], b - 48);
+		FlagShah = Shah(cx, cy, 0);
+		if (FlagShah == 2)
+		{
+			printf("Неверный ход! Шах сохраняется!");
+			system("Pause");
+			mtemp(); cvet = 0;
+			cx = temp_cx;
+			cy = temp_cy;
+		}
+		else if (Shah(bx, by, 1)==1)
+		{
+			printf("Шах белому королю!");
+			system("Pause");
+			cvet = 1;
+		}
+		system("cls");
+		OutputFigure();
+
+	}
+	goto label1;
+	_getch();
+}
+
+
+
+
+
+
+
+
