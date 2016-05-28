@@ -1,0 +1,1214 @@
+#ifndef Logic_h
+#define Logic_h
+
+#include "MaxForm.h"
+
+
+namespace Logica {
+	
+	int pole[10][10], tempmas[10][10];
+	int Hod11, Hod33;
+	int flag;
+	int fl;
+	int m, n, z;
+	int back, kolb, kolc;
+	int xxx[9][9], yyy[9][9];
+	int zzz, qqq;
+	int figyra1[9][9];
+
+	void LV(void);
+	void mtemp(void);
+	void tempm(void);
+	void figure(void);
+	int Shah(int Hod2, int Hod11, int cvet1);
+	int Chek(int cvet, char Hod1, int Hod2, char Hod3, int Hod4);
+	int Pawn(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33);
+	int Rook(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33);
+	int Bishop(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33);
+	int Horse(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33);
+	int Queen(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33);
+	int King(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33);
+
+int King(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33)
+{
+	// Проверка перемещения короля(на 1 клетку в любую сторону)
+	if (((Hod4 == Hod2) && (Hod33 == Hod11 - 1)) || ((Hod4 == Hod2) && (Hod33 == Hod11 + 1)) || ((Hod4 == Hod2 - 1) && (Hod33 == Hod11 - 1))
+		|| ((Hod4 == Hod2 - 1) && (Hod33 == Hod11 + 1)) || ((Hod4 == Hod2 - 1) && (Hod33 == Hod11)) || ((Hod4 == Hod2 + 1) && (Hod33 == Hod11 - 1))
+		|| ((Hod4 == Hod2 + 1) && (Hod33 == Hod11 + 1)) || ((Hod4 == Hod2 + 1) && (Hod33 == Hod11)))
+	{
+		// Проверка на возможность нахождения в конечной клетке своих фигур
+		if (cvet1 == 1)
+		{
+			if ((pole[Hod4][Hod33] >= 2) && (pole[Hod4][Hod33] <= 6))
+			{
+				return 5;
+			}
+		}
+		if (cvet1 == 0)
+		{
+			if ((pole[Hod4][Hod33] >= 12) && (pole[Hod4][Hod33] <= 16))
+			{
+				return 5;
+			}
+		}
+		// клетка свободна
+		if (pole[Hod4][Hod33] == 0)
+		{
+			// Освобождаем то место ОТКУДА мы походили
+			pole[Hod2][Hod11] = 0;
+			if (cvet1 == 1)
+			{
+				// и присваиваем значение соответственно белого (цвет = 1) короля клетке КУДА мы походили
+				pole[Hod4][Hod33] = 1;
+			//	bx = Hod4;
+			//	by = Hod33;
+				return 0;
+			}
+			if (cvet1 == 0)
+			{
+				// и присваиваем значение чёрного (цвет = 0) короля
+				pole[Hod4][Hod33] = 11;
+				//cx = Hod4;
+				//cy = Hod33;
+				return 0;
+			}
+		}
+		// Если а клетке, КУДА мы походили, стоит фигура другого игрока
+		if (cvet1 == 0)
+		{
+			if ((pole[Hod4][Hod33] >= 2) && (pole[Hod4][Hod33] <= 6))
+			{
+				pole[Hod4][Hod33] = 11;
+				pole[Hod2][Hod11] = 0;
+			//	cx = Hod4;
+			//	cy = Hod33;
+				//nbel = nbel - 1;
+				//cvet = 1; // переход хода
+				return 0;
+			}
+		}
+		if (cvet1 == 1)
+		{
+			if ((pole[Hod4][Hod33] >= 12) && (pole[Hod4][Hod33] <= 16))
+			{
+				pole[Hod4][Hod33] = 1;
+				pole[Hod2][Hod11] = 0;
+			//	bx = Hod4;
+			//	by = Hod33;
+				//ncher = ncher - 1;
+				//cvet = 0; // переход хода
+				return 0;
+			}
+		}
+	}
+	else
+	{
+		return 5;
+	}
+}
+
+int Queen(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33)
+{
+	int i, j;
+
+	flag = 0;
+	if (Hod2 == Hod4)
+	{
+		if (Hod33 > Hod11)
+			for (i = (Hod11 + 1); i <= (Hod33 - 1); i++)
+			{
+				if (pole[Hod2][i] != 0)
+				{
+					flag = 1;
+				}
+			}
+		else
+			for (i = (Hod33 + 1); i <= (Hod11 - 1); i++)
+			{
+				if (pole[Hod2][i] != 0)
+				{
+					flag = 1;
+				}
+			}
+	}
+	if (Hod11 == Hod33)
+	{
+		if (Hod4 > Hod2)
+			for (i = (Hod2 + 1); i <= (Hod4 - 1); i++)
+			{
+				if (pole[i][Hod11] != 0)
+				{
+					flag = 1;
+				}
+			}
+		else
+			for (i = (Hod4 + 1); i <= (Hod2 - 1); i++)
+			{
+				if (pole[i][Hod11] != 0)
+				{
+					flag = 1;
+				}
+			}
+	}
+	if ((Hod4 < Hod2) && (Hod33 > Hod11))
+	{
+		j = Hod11 + 1;
+		for (i = Hod2 - 1; i > Hod4; i = i - 1)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j + 1;
+		}
+	}
+	if ((Hod4 > Hod2) && (Hod33 > Hod11))
+	{
+		j = Hod11 + 1;
+		for (i = Hod2 + 1; i < Hod4; i++)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j + 1;
+		}
+	}
+	if ((Hod4 > Hod2) && (Hod33 < Hod11))
+	{
+		j = Hod11 - 1;
+		for (i = Hod2 + 1; i < Hod4; i++)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j - 1;
+		}
+	}
+	if ((Hod4 < Hod2) && (Hod33 < Hod11))
+	{
+		j = Hod11 - 1;
+		for (i = Hod2 - 1; i > Hod4; i = i - 1)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j - 1;
+		}
+	}
+
+	if (flag == 0)
+	{
+		// Королева ходит и по диагонали и по прямым линиям
+		if (((abs(Hod4 - Hod2) == abs(Hod33 - Hod11))) || ((Hod33 > Hod11) && (Hod2 > Hod4) && (abs(Hod4 - Hod2) == abs(Hod33 - Hod11)))
+			|| ((Hod11 > Hod33) && (Hod2 > Hod4) && (abs(Hod4 - Hod2) == abs(Hod33 - Hod11))) || (Hod4 == Hod2) || (Hod33 == Hod11))
+		{
+			// Проверка на возможность того, что там уже стоит наша фигура
+			if (cvet1 == 1)
+			{
+				if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+				{
+					return 5;
+				}
+			}
+			if (cvet1 == 0)
+			{
+				if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+				{
+					return 5;
+				}
+			}
+			if (pole[Hod4][Hod33] == 0)
+			{
+				// Освобождаем то место ОТКУДА мы походили
+				pole[Hod2][Hod11] = 0;
+				if (cvet1 == 1)
+				{
+					// и присваиваем значение соответственно белой (цвет = 1) королевы в клетку КУДА мы походили
+					pole[Hod4][Hod33] = 2;
+					//cvet = 0; // переход хода
+					return 0;
+				}
+				if (cvet1 == 0)
+				{
+					// и присваиваем значение белой (цвет = 0) королевы
+					pole[Hod4][Hod33] = 12;
+					//cvet = 1; // переход хода
+					return 0;
+				}
+			}
+			// Если а клетке, КУДА мы походили, стоит фигура другого игрока
+			if (cvet1 == 0)
+			{
+				if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+				{
+					pole[Hod4][Hod33] = 12;
+					pole[Hod2][Hod11] = 0;
+					//nbel = nbel - 1;
+					//cvet = 1; // переход хода
+					return 0;
+				}
+			}
+			if (cvet1 == 1)
+			{
+				if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+				{
+					pole[Hod4][Hod33] = 2;
+					pole[Hod2][Hod11] = 0;
+					//ncher = ncher - 1;
+					//cvet = 0; // переход хода
+					return 0;
+				}
+			}
+		}
+		else
+		{
+			return 5;
+		}
+	}
+	else
+	{
+		return 5;
+	}
+}
+
+int Bishop(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33)
+{
+	int i, j;
+
+	flag = 0;
+	if ((Hod4 < Hod2) && (Hod33 > Hod11))
+	{
+		j = Hod11 + 1;
+		for (i = Hod2 - 1; i > Hod4; i = i - 1)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j + 1;
+		}
+	}
+	if ((Hod4 > Hod2) && (Hod33 > Hod11))
+	{
+		j = Hod11 + 1;
+		for (i = Hod2 + 1; i < Hod4; i++)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j + 1;
+		}
+	}
+	if ((Hod4 > Hod2) && (Hod33 < Hod11))
+	{
+		j = Hod11 - 1;
+		for (i = Hod2 + 1; i < Hod4; i++)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j - 1;
+		}
+	}
+	if ((Hod4 < Hod2) && (Hod33 < Hod11))
+	{
+		j = Hod11 - 1;
+		for (i = Hod2 - 1; i > Hod4; i = i - 1)
+		{
+			if (pole[i][j] != 0)
+			{
+				flag = 1;
+			}
+			j = j - 1;
+		}
+	}
+
+	if (flag == 0)
+	{
+		// Проверка хода слона(по диагонали)
+		if (((abs(Hod4 - Hod2) == abs(Hod33 - Hod11))) || ((Hod33 > Hod11) && (Hod2 > Hod4) && (abs(Hod4 - Hod2) == abs(Hod33 - Hod11)))
+			|| ((Hod11 > Hod33) && (Hod2 > Hod4) && (abs(Hod4 - Hod2) == abs(Hod33 - Hod11))))
+		{
+			// Проверка на возможность того, что там уже стоит наша фигура
+			if (cvet1 == 1)
+			{
+				if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+				{
+					return 5;
+				}
+			}
+			if (cvet1 == 0)
+			{
+				if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+				{
+					return 5;
+				}
+			}
+			if (pole[Hod4][Hod33] == 0)
+			{
+				// Освобождаем то место ОТКУДА мы походили
+				pole[Hod2][Hod11] = 0;
+				if (cvet1 == 1)
+				{
+					// и присваиваем значение соответственно белого (цвет = 1) офицера в клетку КУДА мы походили
+					pole[Hod4][Hod33] = 3;
+					//cvet = 0; // переход хода
+					return 0;
+				}
+				if (cvet1 == 0)
+				{
+					// и присваиваем значение чёрного (цвет = 0) офицера
+					pole[Hod4][Hod33] = 13;
+					//cvet = 1; // переход хода
+					return 0;
+				}
+			}
+			// Если а клетке, КУДА мы походили, стоит фигура другого игрока
+			if (cvet1 == 0)
+			{
+				if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+				{
+					pole[Hod4][Hod33] = 13;
+					pole[Hod2][Hod11] = 0;
+					//nbel = nbel - 1;
+					//cvet = 1; // переход хода
+					return 0;
+				}
+			}
+			if (cvet1 == 1)
+			{
+				if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+				{
+					pole[Hod4][Hod33] = 3;
+					pole[Hod2][Hod11] = 0;
+					//ncher = ncher - 1;
+					//cvet = 0; // переход хода
+					return 0;
+				}
+			}
+		}
+		else
+		{
+			return 5;
+		}
+	}
+	else
+	{
+		return 5;
+	}
+}
+
+int Horse(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33)
+{
+	// Это проверка на то, может ли вообще конь переместиться туда(это шаги "буквой "Г"")
+	if (((Hod4 == Hod2 - 2) && (Hod33 == Hod11 - 1)) || ((Hod4 == Hod2 - 2) && (Hod33 == Hod11 + 1)) || ((Hod4 == Hod2 - 1) && (Hod33 == Hod11 + 2))
+		|| ((Hod4 == Hod2 + 1) && (Hod33 == Hod11 + 2)) || ((Hod4 == Hod2 - 1) && (Hod33 == Hod11 - 2)) || ((Hod4 == Hod2 + 1) && (Hod33 == Hod11 - 2))
+		|| ((Hod4 == Hod2 + 2) && (Hod33 == Hod11 - 1)) || ((Hod4 == Hod2 + 2) && (Hod33 == Hod11 + 1)))
+	{
+		// Проверка на возможность того, что там уже стоит наша фигура
+		if (cvet1 == 1)
+		{
+			if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+			{
+				return 5;
+			}
+		}
+		if (cvet1 == 0)
+		{
+			if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+			{
+				return 5;
+			}
+		}
+		if (pole[Hod4][Hod33] == 0)
+		{
+			// Освобождаем то место ОТКУДА мы походили
+			pole[Hod2][Hod11] = 0;
+			if (cvet1 == 1)
+			{
+				// и присваиваем значение соответственно белого (цвет = 1) коня
+				pole[Hod4][Hod33] = 4;
+				//cvet = 0; // переход хода
+				return 0;
+			}
+			if (cvet1 == 0)
+			{
+				// и присваиваем значение чёрного (цвет = 0) коня
+				pole[Hod4][Hod33] = 14;
+				//cvet = 1; // переход хода
+				return 0;
+			}
+		}
+		// Если а клетке, КУДА мы походили, стоит фигура другого игрока
+		if (cvet1 == 0)
+		{
+			if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+			{
+				pole[Hod4][Hod33] = 14;
+				pole[Hod2][Hod11] = 0;
+				//nbel = nbel - 1;
+				//cvet = 1; // переход хода
+				return 0;
+			}
+		}
+		if (cvet1 == 1)
+		{
+			if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+			{
+				pole[Hod4][Hod33] = 4;
+				pole[Hod2][Hod11] = 0;
+				//ncher = ncher - 1;
+				//cvet = 0; // переход хода
+				return 0;
+			}
+		}
+	}
+	else
+	{
+		return 5;
+	}
+	return 5;
+}
+
+int Rook(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33)
+{
+	int i;
+
+	flag = 0;
+	if (Hod2 == Hod4)
+	{
+		if (Hod33 > Hod11)
+			for (i = (Hod11 + 1); i <= (Hod33 - 1); i++)
+			{
+				if (pole[Hod2][i] != 0)
+				{
+					flag = 1;
+				}
+			}
+		else
+			for (i = (Hod33 + 1); i <= (Hod11 - 1); i++)
+			{
+				if (pole[Hod2][i] != 0)
+				{
+					flag = 1;
+				}
+			}
+	}
+	if (Hod11 == Hod33)
+	{
+		if (Hod4 > Hod2)
+			for (i = (Hod2 + 1); i <= (Hod4 - 1); i++)
+			{
+				if (pole[i][Hod11] != 0)
+				{
+					flag = 1;
+				}
+			}
+		else
+			for (i = (Hod4 + 1); i <= (Hod2 - 1); i++)
+			{
+				if (pole[i][Hod11] != 0)
+				{
+					flag = 1;
+				}
+			}
+	}
+
+	if (flag == 0)
+	{
+		// Проверка хода ладьи(столбец или строка)
+		if ((Hod4 == Hod2) || (Hod33 == Hod11))
+		{
+			// Проверка на возможность того, что там уже стоит наша фигура
+			if (cvet1 == 1)
+			{
+				if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+				{
+					return 5;
+				}
+			}
+			if (cvet1 == 0)
+			{
+				if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+				{
+					return 5;
+				}
+			}
+			if (pole[Hod4][Hod33] == 0)
+			{
+				// Освобождаем то место ОТКУДА мы походили
+				pole[Hod2][Hod11] = 0;
+				if (cvet1 == 1)
+				{
+					// и присваиваем значение соответственно белой (цвет = 1) ладьи в клетку КУДА мы походили
+					pole[Hod4][Hod33] = 5;
+					//cvet = 0; // переход хода
+					return 0;
+				}
+				if (cvet1 == 0)
+				{
+					// и присваиваем значение чёрной (цвет = 0) ладьи
+					pole[Hod4][Hod33] = 15;
+					//cvet = 1; // переход хода
+					return 0;
+				}
+			}
+			// Если а клетке, КУДА мы походили, стоит фигура другого игрока
+			if (cvet1 == 0)
+			{
+				if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+				{
+					pole[Hod4][Hod33] = 15;
+					pole[Hod2][Hod11] = 0;
+					//nbel = nbel - 1;
+					//cvet = 1; // переход хода
+					return 0;
+				}
+			}
+			if (cvet1 == 1)
+			{
+				if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+				{
+					pole[Hod4][Hod33] = 5;
+					pole[Hod2][Hod11] = 0;
+					//ncher = ncher - 1;
+					//cvet = 0; // переход хода
+					return 0;
+				}
+			}
+		}
+		else
+		{
+			return 5;
+		}
+	}
+	else
+	{
+		return 5;
+	}
+	return 5;
+}
+
+int Pawn(int Hod2, int Hod11, int cvet1, int Hod4, int Hod33)
+{
+	// Проверка уничтожения пешкой фигуры противника
+	// Если на клетке, что стоит на одну клетку по диагонали от пешки, есть фигура другого игрока, то..
+	if (Hod11 != Hod33)
+	{
+		if (cvet1 == 1)
+		{
+			if ((((Hod33 - Hod11) == 1) && ((Hod4 - Hod2) == 1)) || (((Hod11 - Hod33) == 1) && ((Hod4 - Hod2) == 1)))
+			{
+				if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+				{
+					pole[Hod4][Hod33] = 6;
+					pole[Hod2][Hod11] = 0;
+					//ncher = ncher - 1;
+					//cvet = 0; // переход хода
+					return 0;
+				}
+				else return 5;
+			}
+		}
+
+		if (cvet1 == 0)
+		{
+			if ((((Hod33 - Hod11) == 1) && ((Hod2 - Hod4) == 1)) || (((Hod2 - Hod4) == 1)) && ((Hod11 - Hod33) == 1))
+			{
+				if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+				{
+					pole[Hod4][Hod33] = 16;
+					pole[Hod2][Hod11] = 0;
+					//nbel = nbel - 1;
+					//cvet = 1; // переход хода
+					return 0;
+				}
+				else return 5;
+			}
+		}
+	}
+
+	else
+	{
+		// Проверка перемещения пешки
+		if (cvet1 == 1)
+		{
+			if ((Hod2 == 2) && (Hod33 == Hod11))
+			{
+				if ((Hod33 == Hod11) && ((Hod4 == Hod2 + 1) || (Hod4 == Hod2 + 2)))
+				{
+					// Проверка на возможность того, что там уже стоит наша фигура
+					if (cvet1 == 1)
+					{
+						if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+						{
+							return 5;
+						}
+					}
+					if (cvet1 == 0)
+					{
+						if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+						{
+							return 5;
+						}
+					}
+
+					// Освобождаем то место ОТКУДА мы походили
+					pole[Hod2][Hod11] = 0;
+					if (cvet1 == 1)
+					{
+						// и присваиваем значение соответственно белой (цвет = 1) пешки в клетку КУДА мы походили
+						pole[Hod4][Hod33] = 6;
+						//cvet = 0; // переход хода
+						return 0;
+					}
+					if (cvet1 == 0)
+					{
+						// и присваиваем значение чёрной (цвет = 0) пешки
+						pole[Hod4][Hod33] = 16;
+						//cvet = 1; // переход хода
+						return 0;
+					}
+				}
+				else
+				{
+					return 5;
+				}
+			}
+			else
+			{
+				if ((Hod33 == Hod11) && (Hod4 == Hod2 + 1))
+				{
+					// Проверка на возможность того, что там уже стоит наша фигура
+					if (cvet1 == 1)
+					{
+						if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+						{
+							return 5;
+						}
+					}
+					if (cvet1 == 0)
+					{
+						if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+						{
+							return 5;
+						}
+					}
+					// Освобождаем то место ОТКУДА мы походили
+					pole[Hod2][Hod11] = 0;
+					if (cvet1 == 1)
+					{
+						// и присваиваем значение соответственно белой (цвет = 1) пешки в клетку КУДА мы походили
+						pole[Hod4][Hod33] = 6;
+						//cvet = 0; // переход хода
+						return 0;
+					}
+					if (cvet1 == 0)
+					{
+						// и присваиваем значение чёрной (цвет = 0) пешки
+						pole[Hod4][Hod33] = 16;
+						//cvet = 1; // переход хода
+						return 0;
+					}
+				}
+				else
+				{
+					return 5;
+				}
+			}
+		}
+		else
+		{
+			if (Hod2 == 7)
+			{
+				if ((Hod33 == Hod11) && ((Hod4 == Hod2 - 1) || (Hod4 == Hod2 - 2)))
+				{
+					// Проверка на возможность того, что там уже стоит наша фигура
+					if (cvet1 == 1)
+					{
+						if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+						{
+							return 5;
+						}
+					}
+					if (cvet1 == 0)
+					{
+						if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+						{
+							return 5;
+						}
+					}
+					// Освобождаем то место ОТКУДА мы походили
+					pole[Hod2][Hod11] = 0;
+					if (cvet1 == 1)
+					{
+						// и присваиваем значение соответственно белой (цвет = 1) пешки в клетку КУДА мы походили
+						pole[Hod4][Hod33] = 6;
+						//cvet = 0; // переход хода
+						return 0;
+					}
+					if (cvet1 == 0)
+					{
+						// и присваиваем значение чёрной (цвет = 0) пешки
+						pole[Hod4][Hod33] = 16;
+						//cvet = 1; // переход хода
+						return 0;
+					}
+				}
+				else
+				{
+					return 5;
+				}
+			}
+			else
+			{
+				if ((Hod33 == Hod11) && (Hod4 == Hod2 - 1))
+				{
+					// Проверка на возможность того, что там уже стоит наша фигура
+					if (cvet1 == 1)
+					{
+						if ((pole[Hod4][Hod33] >= 1) && (pole[Hod4][Hod33] <= 6))
+						{
+							return 5;
+						}
+					}
+					if (cvet1 == 0)
+					{
+						if ((pole[Hod4][Hod33] >= 11) && (pole[Hod4][Hod33] <= 16))
+						{
+							return 5;
+						}
+					}
+					// Освобождаем то место ОТКУДА мы походили
+					pole[Hod2][Hod11] = 0;
+					if (cvet1 == 1)
+					{
+						// и присваиваем значение соответственно белой (цвет = 1) пешки в клетку КУДА мы походили
+						pole[Hod4][Hod33] = 6;
+						//cvet = 0; // переход хода
+						return 0;
+					}
+					if (cvet1 == 0)
+					{
+						// и присваиваем значение чёрной (цвет = 0) пешки
+						pole[Hod4][Hod33] = 16;
+						//cvet = 1; // переход хода
+						return 0;
+					}
+				}
+				else
+				{
+					return 5;
+				}
+			}
+		}
+	}
+	return 5;
+}
+
+int Chek(int cvet1, char Hod1, int Hod2, char Hod3, int Hod4)
+{
+	int flag_shah = 0, ppp, ppp1;
+	// Тут мы преобразовываем буквы в цифры для ориентировки по массиву
+	if (Hod1 == 'A')
+	{
+		Hod11 = 1;
+	}
+	if (Hod1 == 'B')
+	{
+		Hod11 = 2;
+	}
+	if (Hod1 == 'C')
+	{
+		Hod11 = 3;
+	}
+	if (Hod1 == 'D')
+	{
+		Hod11 = 4;
+	}
+	if (Hod1 == 'E')
+	{
+		Hod11 = 5;
+	}
+	if (Hod1 == 'F')
+	{
+		Hod11 = 6;
+	}
+	if (Hod1 == 'G')
+	{
+		Hod11 = 7;
+	}
+	if (Hod1 == 'H')
+	{
+		Hod11 = 8;
+	}
+	if (Hod3 == 'A')
+	{
+		Hod33 = 1;
+	}
+	if (Hod3 == 'B')
+	{
+		Hod33 = 2;
+	}
+	if (Hod3 == 'C')
+	{
+		Hod33 = 3;
+	}
+	if (Hod3 == 'D')
+	{
+		Hod33 = 4;
+	}
+	if (Hod3 == 'E')
+	{
+		Hod33 = 5;
+	}
+	if (Hod3 == 'F')
+	{
+		Hod33 = 6;
+	}
+	if (Hod3 == 'G')
+	{
+		Hod33 = 7;
+	}
+	if (Hod3 == 'H')
+	{
+		Hod33 = 8;
+	}
+	// Перенаправления на фигуры + проверка хода ( на предмет введения какой-либо ерунды )
+	ppp = pole[Hod2][Hod11];
+	ppp1 = pole[Hod4][Hod33];
+	if (((Hod11 >= 1) && (Hod11 <= 8)) && ((Hod2 >= 1) && (Hod2 <= 8)) && ((Hod33 >= 1) && (Hod33 <= 8)) && ((Hod4 >= 1) && (Hod4 <= 8)))
+	{
+		if ((cvet1 == 1) && ((pole[Hod2][Hod11] >= 1) && (pole[Hod2][Hod11] <= 6))) // белые фигуры ( цвет = 1 )
+		{
+			if (pole[Hod2][Hod11] == 1)
+			{
+				back = King(Hod2, Hod11, 1, Hod4, Hod33);
+				if (back == 0) { back = 111; }
+			}
+			if (pole[Hod2][Hod11] == 2)
+			{
+				back = Queen(Hod2, Hod11, 1, Hod4, Hod33);
+			}
+			if (pole[Hod2][Hod11] == 3)
+			{
+				back = Bishop(Hod2, Hod11, 1, Hod4, Hod33);
+			}
+			if (pole[Hod2][Hod11] == 4)
+			{
+				back = Horse(Hod2, Hod11, 1, Hod4, Hod33);
+			}
+			if (pole[Hod2][Hod11] == 5)
+			{
+				back = Rook(Hod2, Hod11, 1, Hod4, Hod33);
+			}
+			if (pole[Hod2][Hod11] == 6)
+			{
+				back = Pawn(Hod2, Hod11, 1, Hod4, Hod33);
+			}
+		}
+		else
+		{
+			if ((cvet1 == 0) && ((pole[Hod2][Hod11] >= 11) && (pole[Hod2][Hod11] <= 16))) // чёрные фигуры ( цвет = 0 )
+			{
+				if (pole[Hod2][Hod11] == 11)
+				{
+					back = King(Hod2, Hod11, 0, Hod4, Hod33);
+					if (back == 0) { back = 112; }
+				}
+				if (pole[Hod2][Hod11] == 12)
+				{
+					back = Queen(Hod2, Hod11, 0, Hod4, Hod33);
+				}
+				if (pole[Hod2][Hod11] == 13)
+				{
+					back = Bishop(Hod2, Hod11, 0, Hod4, Hod33);
+				}
+				if (pole[Hod2][Hod11] == 14)
+				{
+					back = Horse(Hod2, Hod11, 0, Hod4, Hod33);
+				}
+				if (pole[Hod2][Hod11] == 15)
+				{
+					back = Rook(Hod2, Hod11, 0, Hod4, Hod33);
+				}
+				if (pole[Hod2][Hod11] == 16)
+				{
+					back = Pawn(Hod2, Hod11, 0, Hod4, Hod33);
+				}
+			}
+			else { back = 5; }
+		}
+	}
+	return (back);
+	
+}
+
+
+int Shah(int Hod2, int Hod11, int cvet1)
+{
+	int FlagShah = 0; 
+	int x, y;
+	kolb = 0; kolc = 0;
+	if (cvet1 == 1)
+	{
+		if ((pole[Hod2 + 1][Hod11 - 1] == 16) || (pole[Hod2 + 1][Hod11 + 1] == 16)) // пешка 
+		{
+			FlagShah = 1; kolb++;
+		}
+
+		// конь
+		if ((pole[Hod2 - 2][Hod11 - 1] == 14) || (pole[Hod2 - 2][Hod11 + 1] == 14) || (pole[Hod2 - 1][Hod11 + 2] == 14) || (pole[Hod2 + 1][Hod11 + 2] == 14)
+			|| (pole[Hod2 + 2][Hod11 - 1] == 14) || (pole[Hod2 + 2][Hod11 + 1] == 14) || (pole[Hod2 - 1][Hod11 - 2] == 14) || (pole[Hod2 + 1][Hod11 - 2] == 14))
+		{
+			FlagShah = 1; kolb++;
+		}
+	}
+	// черные
+	if (cvet1 == 0)
+	{
+		// пешка
+		if ((pole[Hod2 + 1][Hod11 - 1] == 6) || (pole[Hod2 - 1][Hod11 - 1] == 6))
+		{
+			FlagShah = 2; kolc++;
+		}
+
+		// конь
+		if ((pole[Hod2 - 2][Hod11 - 1] == 4) || (pole[Hod2 - 2][Hod11 + 1] == 4) || (pole[Hod2 - 1][Hod11 + 2] == 4) || (pole[Hod2 + 1][Hod11 + 2] == 4)
+			|| (pole[Hod2 + 2][Hod11 - 1] == 4) || (pole[Hod2 + 2][Hod11 + 1] == 4) || (pole[Hod2 - 1][Hod11 - 2] == 4) || (pole[Hod2 + 1][Hod11 - 2] == 4))
+		{
+			FlagShah = 2; kolc++;
+		}
+	}
+
+	// королева, офицер, ладья
+	x = Hod2 + 1;
+	y = Hod11 + 1;
+	while ((pole[x][y] == 0) && ((x <= 8) && (y <= 8)))
+	{
+		x++;
+		y++;
+	}
+	if  ((cvet1==1) && ((pole[x][y] == 13) || (pole[x][y] == 12)))
+	{
+		FlagShah = 1; kolb++;
+	}
+	else 
+		if ((cvet1 == 0) && ((pole[x][y] == 3) || (pole[x][y] == 2)))
+		{
+			FlagShah = 2; kolc++;
+		}
+
+	x = Hod2 + 1;
+	y = Hod11 - 1;
+	while ((pole[x][y] == 0) && ((x <= 8) && (y >= 1)))
+	{
+		x++;
+		y--;
+	}
+	if ((cvet1==1) && ((pole[x][y] == 13) || (pole[x][y] == 12)))
+	{
+		FlagShah = 1; kolb++;
+	}
+	else if ((cvet1 == 0) && ((pole[x][y] == 3) || (pole[x][y] == 2)))
+           {
+			   FlagShah = 2; kolc++;
+	       }
+	x = Hod2 - 1;
+	y = Hod11 - 1;
+	while ((pole[x][y] == 0) && ((x >= 1) && (y >= 1)))
+	{
+		x--;
+		y--;
+	}
+	if ((cvet1==1) && ((pole[x][y] == 13) || (pole[x][y] == 12)))
+	{
+		FlagShah = 1; kolb++;
+	}
+	else if ((cvet1 == 0) && ((pole[x][y] == 3) || (pole[x][y] == 2)))
+	       {
+			   FlagShah = 2; kolc++;
+	       }
+	x = Hod2 - 1;
+	y = Hod11 + 1;
+	while ((pole[x][y] == 0) && ((x >= 1) && (y <= 8)))
+	{
+		x--;
+		y++;
+	}
+	if ((cvet1==1) && ((pole[x][y] == 13) || (pole[x][y] == 12)))
+	{
+		FlagShah = 1; kolb++;
+	}
+	else if ((cvet1 == 0) && ((pole[x][y] == 3) || (pole[x][y] == 2)))
+	       {
+			   FlagShah = 2; kolc++;
+	       }
+	x = Hod2; y = Hod11 + 1;
+	while ((y <= 8) && (pole[x][y] == 0))
+	{
+		y++;
+	}
+	if ((cvet1==1) && ((pole[x][y] == 15) || (pole[x][y] == 12)))
+	{
+		FlagShah = 1; kolb++;
+	}
+	else if ((cvet1 == 0) && ((pole[x][y] == 3) || (pole[x][y] == 2)))
+	       {
+			   FlagShah = 2; kolc++;
+	       }
+	y = Hod11 - 1;
+	while ((y >= 1) && (pole[x][y] == 0))
+	{
+		y--;
+	}
+	if ((cvet1==1) && ((pole[x][y] == 15) || (pole[x][y] == 12)))
+	{
+		FlagShah = 1; kolb++;
+	}
+	else if ((cvet1 == 0) && ((pole[x][y] == 5) || (pole[x][y] == 2)))
+	       {
+			   FlagShah = 2; kolc++;
+	      }
+
+	y = Hod11;
+	x = Hod2 - 1;
+	while ((x >= 1) && (pole[x][y] == 0))
+	{
+		x--;
+	}
+
+	if ((cvet1==1) && ((pole[x][y] == 15) || (pole[x][y] == 12)))
+	{
+		FlagShah = 1; kolb++;
+	}
+	else if ((cvet1 == 0) && ((pole[x][y] == 5) || (pole[x][y] == 2)))
+	       {
+			   FlagShah = 2; kolc++;
+	       }
+	x = Hod2 + 1;
+	while ((x <= 8) && (pole[x][y] == 0))
+	{
+		x++;
+	}
+	if ((cvet1==1) && ((pole[x][y] == 15) || (pole[x][y] == 12)))
+	{
+		FlagShah = 1; kolb++;
+	}
+	else if ((cvet1 == 0) && ((pole[x][y] == 5) || (pole[x][y] == 2)))
+	       {
+			   FlagShah = 2; kolc++;
+	       }
+	return (FlagShah);
+}
+
+// мат
+int Mat (int px, int py, int cvet1)
+{
+	int kol=0;
+	kol=Shah(px, py, cvet1);
+	if ((kolb > 1) && (cvet1 == 1))
+	{
+		return 1;
+	}
+	if ((kolc > 1) && (cvet1 == 0))
+	{
+		return 2;
+	}
+}
+
+void LV(void)
+{
+	figyra1[1][1] = 1;
+	figyra1[1][2] = 2;
+	figyra1[1][3] = 3;
+	figyra1[1][4] = 4;
+	figyra1[1][5] = 5;
+	figyra1[1][6] = 6;
+	figyra1[1][7] = 7;
+	figyra1[1][8] = 8;
+	figyra1[2][1] = 11;
+	figyra1[2][2] = 12;
+	figyra1[2][3] = 13;
+	figyra1[2][4] = 14;
+	figyra1[2][5] = 15;
+	figyra1[2][6] = 16;
+	figyra1[2][7] = 17;
+	figyra1[2][8] = 18;
+	for (zzz = 3; zzz <= 6; zzz++) {
+		for (qqq = 1; qqq <= 8; qqq++) {
+			figyra1[zzz][qqq] = 0;
+		}
+	}
+	figyra1[7][1] = 21;
+	figyra1[7][2] = 22;
+	figyra1[7][3] = 23;
+	figyra1[7][4] = 24;
+	figyra1[7][5] = 25;
+	figyra1[7][6] = 26;
+	figyra1[7][7] = 27;
+	figyra1[7][8] = 28;
+	figyra1[8][1] = 31;
+	figyra1[8][2] = 32;
+	figyra1[8][3] = 33;
+	figyra1[8][4] = 34;
+	figyra1[8][5] = 35;
+	figyra1[8][6] = 36;
+	figyra1[8][7] = 37;
+	figyra1[8][8] = 38;
+	
+}
+
+void figure(void)
+{
+	int bel[16] = { 5, 4, 3, 2, 1, 3, 4, 5, 6, 6, 6, 6, 6, 6, 6, 6 };
+	int cher[16] = { 16, 16, 16, 16, 16, 16, 16, 16, 15, 14, 13, 12, 11, 13, 14, 15 };
+
+	LV();
+	
+	for (m = 0; m <= 9; m++) {
+		for (n = 0; n <= 9; n++) {
+			pole[m][n] = 0;
+		}
+	}
+	// Это первоначальные расстановки соответственно белых фигур 
+	z = 0;
+	for (m = 1; m <= 2; m++) {
+		for (n = 1; n <= 8; n++) {
+			pole[m][n] = bel[z];
+			z++;
+		}
+	}
+	// чёрных фигур
+	z = 0;
+	for (m = 7; m <= 8; m++) {
+		for (n = 1; n <= 8; n++) {
+			pole[m][n] = cher[z];
+			z++;
+		}
+	}
+}
+
+void tempm(void)
+{
+	for (m = 0; m <= 9; m++) {
+		for (n = 0; n <= 9; n++) {
+			tempmas[m][n] = pole[m][n];
+		}
+	}
+}
+void mtemp(void)
+{
+	for (m = 0; m <= 9; m++) {
+		for (n = 0; n <= 9; n++) {
+			pole[m][n] = tempmas[m][n];
+		}
+	}
+}
+}
+#endif
