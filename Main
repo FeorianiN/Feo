@@ -1,0 +1,24 @@
+#include "MaxForm.h"
+#include <wchar.h>
+#include <Windows.h>
+#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <stdio.h>
+#include <string>
+#include <locale.h>
+#include "Logic.h"
+
+using namespace std;
+using namespace MaxChess;
+using namespace Logica;
+int cx, cy, bx, by;
+
+[STAThreadAttribute]                   //            Run this program in STA mode
+int main()
+{
+	figure();
+	MaxForm fm;                     //            The form to be created and shown
+	fm.ShowDialog();             //            Show the form
+}
