@@ -22,14 +22,16 @@ namespace MaxChess {
 	using namespace System::Drawing;
 	using namespace Logica;
 	int figyra1[9][9];
-	int cvet=1;
-	int cx=8, cy=5, bx=1, by=5;
+	int cvet = 1;
+	int cx = 8, cy = 5, bx = 1, by = 5;
 	int FlagShah1;
 	int xxx[9][9], yyy[9][9];
 	int zzz, qqq;
 	int m, n, z;
-	char str[2]="";
-	int a=0, b=0;
+	char str[2] = "";
+	char uy, uy2, c;
+	int a = 0, b = 0;
+	int i_mouse;
 
 	/// <summary>
 	/// Сводка для MaxForm
@@ -58,7 +60,7 @@ namespace MaxChess {
 	private: System::Windows::Forms::PictureBox^  ChessBoard;
 	private: System::Windows::Forms::PictureBox^  WhiteKing;
 	private: System::Windows::Forms::TextBox^  Input;
-	private: System::Windows::Forms::Button^  NextTop;
+
 	private: System::Windows::Forms::PictureBox^  WhiteQueen;
 	private: System::Windows::Forms::PictureBox^  BlackQueen;
 	private: System::Windows::Forms::PictureBox^  WhiteHorseL;
@@ -95,6 +97,8 @@ namespace MaxChess {
 	private: System::Windows::Forms::Label^  label1;
 	private: System::Windows::Forms::Label^  label2;
 	private: System::Windows::Forms::Label^  label3;
+	private: System::Windows::Forms::Button^  button1;
+	private: System::Windows::Forms::Label^  label4;
 
 
 
@@ -119,7 +123,6 @@ namespace MaxChess {
 			this->ChessBoard = (gcnew System::Windows::Forms::PictureBox());
 			this->WhiteKing = (gcnew System::Windows::Forms::PictureBox());
 			this->Input = (gcnew System::Windows::Forms::TextBox());
-			this->NextTop = (gcnew System::Windows::Forms::Button());
 			this->WhiteQueen = (gcnew System::Windows::Forms::PictureBox());
 			this->BlackQueen = (gcnew System::Windows::Forms::PictureBox());
 			this->WhiteHorseL = (gcnew System::Windows::Forms::PictureBox());
@@ -154,6 +157,8 @@ namespace MaxChess {
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->button1 = (gcnew System::Windows::Forms::Button());
+			this->label4 = (gcnew System::Windows::Forms::Label());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->BlackKing))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->ChessBoard))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->WhiteKing))->BeginInit();
@@ -225,13 +230,15 @@ namespace MaxChess {
 			// Input
 			// 
 			this->Input->Cursor = System::Windows::Forms::Cursors::Arrow;
+			this->Input->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(204)));
 			this->Input->ForeColor = System::Drawing::SystemColors::WindowText;
 			this->Input->Location = System::Drawing::Point(764, 565);
 			this->Input->Margin = System::Windows::Forms::Padding(4, 5, 4, 5);
-			this->Input->MaxLength = 4;
+			this->Input->MaxLength = 5;
 			this->Input->Name = L"Input";
 			this->Input->RightToLeft = System::Windows::Forms::RightToLeft::No;
-			this->Input->Size = System::Drawing::Size(208, 26);
+			this->Input->Size = System::Drawing::Size(208, 35);
 			this->Input->TabIndex = 4;
 			this->Input->Text = L"Ввод хода";
 			this->Input->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
@@ -239,17 +246,6 @@ namespace MaxChess {
 			this->Input->MarginChanged += gcnew System::EventHandler(this, &MaxForm::NextInput_TextChanged);
 			this->Input->TextChanged += gcnew System::EventHandler(this, &MaxForm::NextInput_TextChanged);
 			this->Input->Enter += gcnew System::EventHandler(this, &MaxForm::NextInput_TextChanged);
-			// 
-			// NextTop
-			// 
-			this->NextTop->Location = System::Drawing::Point(764, 601);
-			this->NextTop->Margin = System::Windows::Forms::Padding(4, 5, 4, 5);
-			this->NextTop->Name = L"NextTop";
-			this->NextTop->Size = System::Drawing::Size(210, 74);
-			this->NextTop->TabIndex = 5;
-			this->NextTop->Text = L"Сделать ход";
-			this->NextTop->UseVisualStyleBackColor = true;
-			this->NextTop->Click += gcnew System::EventHandler(this, &MaxForm::NextTop_Click);
 			// 
 			// WhiteQueen
 			// 
@@ -418,7 +414,6 @@ namespace MaxChess {
 			// 
 			// WhiteRawn8
 			// 
-			this->WhiteRawn8->BackColor = System::Drawing::SystemColors::Control;
 			this->WhiteRawn8->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
 			this->WhiteRawn8->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"WhiteRawn8.Image")));
 			this->WhiteRawn8->Location = System::Drawing::Point(610, 109);
@@ -427,9 +422,6 @@ namespace MaxChess {
 			this->WhiteRawn8->Size = System::Drawing::Size(83, 85);
 			this->WhiteRawn8->TabIndex = 21;
 			this->WhiteRawn8->TabStop = false;
-			this->WhiteRawn8->LocationChanged += gcnew System::EventHandler(this, &MaxForm::WhiteRawn8_LocationChanged);
-			this->WhiteRawn8->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &MaxForm::WhiteRawn8_DragEnter);
-			this->WhiteRawn8->DoubleClick += gcnew System::EventHandler(this, &MaxForm::WhiteRawn8_DoubleClick);
 			// 
 			// BlackElephantL
 			// 
@@ -596,7 +588,6 @@ namespace MaxChess {
 			this->TextLabel->Size = System::Drawing::Size(261, 25);
 			this->TextLabel->TabIndex = 36;
 			this->TextLabel->Text = L"Вывод ходов белых фигур \r\n";
-			this->TextLabel->Click += gcnew System::EventHandler(this, &MaxForm::NextTop_Click);
 			// 
 			// label1
 			// 
@@ -620,7 +611,6 @@ namespace MaxChess {
 			this->label2->Size = System::Drawing::Size(133, 28);
 			this->label2->TabIndex = 38;
 			this->label2->Text = L"Ход белых";
-			this->label2->Click += gcnew System::EventHandler(this, &MaxForm::NextTop_Click);
 			// 
 			// label3
 			// 
@@ -634,12 +624,37 @@ namespace MaxChess {
 			this->label3->TabIndex = 39;
 			this->label3->Text = L"Вывод ходов черных фигур \n";
 			// 
+			// button1
+			// 
+			this->button1->Location = System::Drawing::Point(1217, 680);
+			this->button1->Name = L"button1";
+			this->button1->Size = System::Drawing::Size(92, 31);
+			this->button1->TabIndex = 40;
+			this->button1->Text = L"Сдаться";
+			this->button1->UseVisualStyleBackColor = true;
+			this->button1->Click += gcnew System::EventHandler(this, &MaxForm::button1_Click);
+			// 
+			// label4
+			// 
+			this->label4->AutoSize = true;
+			this->label4->Font = (gcnew System::Drawing::Font(L"Cambria", 10, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(204)));
+			this->label4->ForeColor = System::Drawing::Color::Red;
+			this->label4->Location = System::Drawing::Point(759, 626);
+			this->label4->MaximumSize = System::Drawing::Size(440, 110);
+			this->label4->Name = L"label4";
+			this->label4->Size = System::Drawing::Size(17, 28);
+			this->label4->TabIndex = 41;
+			this->label4->Text = L" ";
+			// 
 			// MaxForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(9, 20);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->AutoSize = true;
 			this->ClientSize = System::Drawing::Size(1386, 752);
+			this->Controls->Add(this->label4);
+			this->Controls->Add(this->button1);
 			this->Controls->Add(this->WhiteRawn8);
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->label2);
@@ -674,7 +689,6 @@ namespace MaxChess {
 			this->Controls->Add(this->WhiteHorseL);
 			this->Controls->Add(this->BlackQueen);
 			this->Controls->Add(this->WhiteQueen);
-			this->Controls->Add(this->NextTop);
 			this->Controls->Add(this->Input);
 			this->Controls->Add(this->WhiteKing);
 			this->Controls->Add(this->BlackKing);
@@ -720,82 +734,82 @@ namespace MaxChess {
 
 		}
 
-		void proverka_figur(int new_x,int new_y)
+		void proverka_figur(int new_x, int new_y)
 		{
-		if (figyra1[new_x][new_y]==1)
-			this->Controls->Remove(this->WhiteRookL);
-		if (figyra1[new_x][new_y] == 2)
-			this->Controls->Remove(this->WhiteHorseL);
-		if (figyra1[new_x][new_y] == 3)
-			this->Controls->Remove(this->WhiteElephantL);
-		if (figyra1[new_x][new_y] == 4)
-			this->Controls->Remove(this->WhiteQueen);
-		if (figyra1[new_x][new_y] == 5)
-			this->Controls->Remove(this->WhiteKing);
-		if (figyra1[new_x][new_y] == 6)
-			this->Controls->Remove(this->WhiteElephantR);
-		if (figyra1[new_x][new_y] == 7)
-			this->Controls->Remove(this->WhiteHorseR);
-		if (figyra1[new_x][new_y] == 8)
-			this->Controls->Remove(this->WhiteRookR);
-		if (figyra1[new_x][new_y] == 11)
-			this->Controls->Remove(this->WhiteRawn1);
-		if (figyra1[new_x][new_y] == 12)
-			this->Controls->Remove(this->WhiteRawn2);
-		if (figyra1[new_x][new_y] == 13)
-			this->Controls->Remove(this->WhiteRawn3);
-		if (figyra1[new_x][new_y] == 14)
-			this->Controls->Remove(this->WhiteRawn4);
-		if (figyra1[new_x][new_y] == 15)
-			this->Controls->Remove(this->WhiteRawn5);
-		if (figyra1[new_x][new_y] == 16)
-			this->Controls->Remove(this->WhiteRawn6);
-		if (figyra1[new_x][new_y] == 17)
-			this->Controls->Remove(this->WhiteRawn7);
-		if (figyra1[new_x][new_y] == 18)
-			this->Controls->Remove(this->WhiteRawn8);
-		
-		if (figyra1[new_x][new_y] == 31)
-			this->Controls->Remove(this->BlackRookL);
-		if (figyra1[new_x][new_y] == 32)
-			this->Controls->Remove(this->BlackHorseL);
-		if (figyra1[new_x][new_y] == 33)
-			this->Controls->Remove(this->BlackElephantL);
-		if (figyra1[new_x][new_y] == 34)
-			this->Controls->Remove(this->BlackQueen);
-		if (figyra1[new_x][new_y] == 35)
-			this->Controls->Remove(this->BlackKing);
-		if (figyra1[new_x][new_y] == 36)
-			this->Controls->Remove(this->BlackElephantR);
-		if (figyra1[new_x][new_y] == 37)
-			this->Controls->Remove(this->BlackHorseR);
-		if (figyra1[new_x][new_y] == 38)
-			this->Controls->Remove(this->BlackRookR);
-		if (figyra1[new_x][new_y] == 21)
-			this->Controls->Remove(this->BlackPawn1);
-		if (figyra1[new_x][new_y] == 22)
-			this->Controls->Remove(this->BlackPawn2);
-		if (figyra1[new_x][new_y] == 23)
-			this->Controls->Remove(this->BlackPawn3);
-		if (figyra1[new_x][new_y] == 24)
-			this->Controls->Remove(this->BlackPawn4);
-		if (figyra1[new_x][new_y] == 25)
-			this->Controls->Remove(this->BlackPawn5);
-		if (figyra1[new_x][new_y] == 26)
-			this->Controls->Remove(this->BlackPawn6);
-		if (figyra1[new_x][new_y] == 27)
-			this->Controls->Remove(this->BlackPawn7);
-		if (figyra1[new_x][new_y] == 28)
-		    this->Controls->Remove(this->BlackPawn8);
-		
+			if (figyra1[new_x][new_y] == 1)
+				this->Controls->Remove(this->WhiteRookL);
+			if (figyra1[new_x][new_y] == 2)
+				this->Controls->Remove(this->WhiteHorseL);
+			if (figyra1[new_x][new_y] == 3)
+				this->Controls->Remove(this->WhiteElephantL);
+			if (figyra1[new_x][new_y] == 4)
+				this->Controls->Remove(this->WhiteQueen);
+			if (figyra1[new_x][new_y] == 5)
+				this->Controls->Remove(this->WhiteKing);
+			if (figyra1[new_x][new_y] == 6)
+				this->Controls->Remove(this->WhiteElephantR);
+			if (figyra1[new_x][new_y] == 7)
+				this->Controls->Remove(this->WhiteHorseR);
+			if (figyra1[new_x][new_y] == 8)
+				this->Controls->Remove(this->WhiteRookR);
+			if (figyra1[new_x][new_y] == 11)
+				this->Controls->Remove(this->WhiteRawn1);
+			if (figyra1[new_x][new_y] == 12)
+				this->Controls->Remove(this->WhiteRawn2);
+			if (figyra1[new_x][new_y] == 13)
+				this->Controls->Remove(this->WhiteRawn3);
+			if (figyra1[new_x][new_y] == 14)
+				this->Controls->Remove(this->WhiteRawn4);
+			if (figyra1[new_x][new_y] == 15)
+				this->Controls->Remove(this->WhiteRawn5);
+			if (figyra1[new_x][new_y] == 16)
+				this->Controls->Remove(this->WhiteRawn6);
+			if (figyra1[new_x][new_y] == 17)
+				this->Controls->Remove(this->WhiteRawn7);
+			if (figyra1[new_x][new_y] == 18)
+				this->Controls->Remove(this->WhiteRawn8);
+
+			if (figyra1[new_x][new_y] == 31)
+				this->Controls->Remove(this->BlackRookL);
+			if (figyra1[new_x][new_y] == 32)
+				this->Controls->Remove(this->BlackHorseL);
+			if (figyra1[new_x][new_y] == 33)
+				this->Controls->Remove(this->BlackElephantL);
+			if (figyra1[new_x][new_y] == 34)
+				this->Controls->Remove(this->BlackQueen);
+			if (figyra1[new_x][new_y] == 35)
+				this->Controls->Remove(this->BlackKing);
+			if (figyra1[new_x][new_y] == 36)
+				this->Controls->Remove(this->BlackElephantR);
+			if (figyra1[new_x][new_y] == 37)
+				this->Controls->Remove(this->BlackHorseR);
+			if (figyra1[new_x][new_y] == 38)
+				this->Controls->Remove(this->BlackRookR);
+			if (figyra1[new_x][new_y] == 21)
+				this->Controls->Remove(this->BlackPawn1);
+			if (figyra1[new_x][new_y] == 22)
+				this->Controls->Remove(this->BlackPawn2);
+			if (figyra1[new_x][new_y] == 23)
+				this->Controls->Remove(this->BlackPawn3);
+			if (figyra1[new_x][new_y] == 24)
+				this->Controls->Remove(this->BlackPawn4);
+			if (figyra1[new_x][new_y] == 25)
+				this->Controls->Remove(this->BlackPawn5);
+			if (figyra1[new_x][new_y] == 26)
+				this->Controls->Remove(this->BlackPawn6);
+			if (figyra1[new_x][new_y] == 27)
+				this->Controls->Remove(this->BlackPawn7);
+			if (figyra1[new_x][new_y] == 28)
+				this->Controls->Remove(this->BlackPawn8);
+
 		}
 
 		void LV(void)
 		{
-			bx = 1;by = 5; cx = 8; by = 5;
-			figyra1[1][1] = 1; 	figyra1[1][2] = 2; 	figyra1[1][3] = 3; 	figyra1[1][4] = 4; 	
+			bx = 1; by = 5; cx = 8; by = 5;
+			figyra1[1][1] = 1; 	figyra1[1][2] = 2; 	figyra1[1][3] = 3; 	figyra1[1][4] = 4;
 			figyra1[1][5] = 5; 	figyra1[1][6] = 6; 	figyra1[1][7] = 7; 	figyra1[1][8] = 8;
-			figyra1[2][1] = 11; figyra1[2][2] = 12; figyra1[2][3] = 13; figyra1[2][4] = 14; 
+			figyra1[2][1] = 11; figyra1[2][2] = 12; figyra1[2][3] = 13; figyra1[2][4] = 14;
 			figyra1[2][5] = 15; figyra1[2][6] = 16; figyra1[2][7] = 17; figyra1[2][8] = 18;
 			for (zzz = 3; zzz <= 6; zzz++) {
 				for (qqq = 1; qqq <= 8; qqq++) {
@@ -826,329 +840,323 @@ namespace MaxChess {
 
 
 #pragma endregion
-	private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
-	
-		
-	}
-	private: System::Void NextTop_Click(System::Object^  sender, System::EventArgs^  e) {
-		int flag_chek,kk,ll;
-		int  fl, temp_bx = 0, temp_by = 0, temp_cx = 0, temp_cy = 0;
-		FlagShah1=0;
+	private: System::Void NextInput_TextChanged(System::Object^  sender, System::EventArgs^  e) {
+		int flag_chek, kk, ll;
+		int temp_bx = 0, temp_by = 0, temp_cx = 0, temp_cy = 0;
+		FlagShah1 = 0;
 		if (Mat(bx, by, 1) == 1)
 		{
 			label2->Text = System::Convert::ToString("МАТ белому королю! Победа черных!");
 			system("Pause");
 			exit;
-	    }
+		}
 		if (Mat(cx, cy, 1) == 2)
 		{
 			label2->Text = System::Convert::ToString("МАТ черному королю! Победа белых!");
 			system("Pause");
 			exit;
 		}
-	if (cvet == 1) { label2->Text = System::Convert::ToString("Ход белых"); }
-	else { label2->Text = System::Convert::ToString("Ход черных"); }
-	String ^yuti1 = System::Convert::ToString(Input->Text);
-	kk = yuti1->Length;
-	if (kk == 4) {
-		str[0] = yuti1[0];
-		a = int(yuti1[1]);
-		str[1] = yuti1[2];
-		b = int(yuti1[3]);
-		if ((str[0] >= 'A') && (str[0] <= 'H') && (str[1] >= 'A') && (str[1] <= 'H') && (a >= 49) && (a <= 57) && (b >= 49) && (b <= 57))
-		{
-			if (cvet == 1)
-			{
-				label2->Text = System::Convert::ToString("Ход белых");
-				tempm();//запомнить массив
-				temp_bx = bx;
-				temp_by = by;
-				flag_chek = Chek(cvet, str[0], a - 48, str[1], b - 48);
-				if (flag_chek == 111)
+		if (cvet == 1) { label2->Text = System::Convert::ToString("Ход белых"); }
+		else { label2->Text = System::Convert::ToString("Ход черных"); }
+		String ^yuti1 = System::Convert::ToString(Input->Text);
+		kk = yuti1->Length;
+		if (kk == 5) {
+			str[0] = yuti1[0];
+			a = int(yuti1[1]);
+			uy = yuti1[1];
+			str[1] = yuti1[2];
+			b = int(yuti1[3]);
+			uy2 = yuti1[3];
+			c = yuti1[4];
+			if (c == ' ') {
+				if ((str[0] >= 'A') && (str[0] <= 'H') && (str[1] >= 'A') && (str[1] <= 'H') && (a >= 49) && (a <= 57) && (b >= 49) && (b <= 57))
 				{
-					bx = b - 48;
-					by = str[1] - 64;
-				}
-
-				if (flag_chek == 5)
-				{
-					label2->Text = System::Convert::ToString("Неверный ход!");
-				}
-				else
-				{
-					if ((flag_chek == 0) || (flag_chek == 111))
+					this->label4->Text = L" ";
+					if (cvet == 1)
 					{
-						FlagShah1 = Shah(bx, by, 1);
-						if (FlagShah1 != 1)
+						label2->Text = System::Convert::ToString("Ход белых");
+						tempm();
+						temp_bx = bx;
+						temp_by = by;
+						flag_chek = Chek(cvet, str[0], a - 48, str[1], b - 48);
+						if (flag_chek == 111)
 						{
-							proverka_figur(b - 48, str[1] - 64);
-							TextLabel->Text = System::Convert::ToString(TextLabel->Text + yuti1 + "  ");
-							if (figyra1[a - 48][str[0] - 64] == 1) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 1;
-								this->WhiteRookL->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							if (figyra1[a - 48][str[0] - 64] == 2) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 2;
-								this->WhiteHorseL->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							if (figyra1[a - 48][str[0] - 64] == 3) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 3;
-								this->WhiteElephantL->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							if (figyra1[a - 48][str[0] - 64] == 4) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 4;
-								this->WhiteQueen->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							if (figyra1[a - 48][str[0] - 64] == 5) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 5;
-								this->WhiteKing->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-
-							}
-							if (figyra1[a - 48][str[0] - 64] == 6) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 6;
-								this->WhiteElephantR->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							if (figyra1[a - 48][str[0] - 64] == 7) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 7;
-								this->WhiteHorseR->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							if (figyra1[a - 48][str[0] - 64] == 8) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 8;
-								this->WhiteRookR->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							if (figyra1[a - 48][str[0] - 64] == 11) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 11;
-								this->WhiteRawn1->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							if (figyra1[a - 48][str[0] - 64] == 12) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 12;
-								this->WhiteRawn2->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							if (figyra1[a - 48][str[0] - 64] == 13) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 13;
-								this->WhiteRawn3->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							if (figyra1[a - 48][str[0] - 64] == 14) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 14;
-								this->WhiteRawn4->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							if (figyra1[a - 48][str[0] - 64] == 15) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 15;
-								this->WhiteRawn5->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							if (figyra1[a - 48][str[0] - 64] == 16) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 16;
-								this->WhiteRawn6->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							if (figyra1[a - 48][str[0] - 64] == 17) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 17;
-								this->WhiteRawn7->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							if (figyra1[a - 48][str[0] - 64] == 18) {
-								figyra1[a - 48][str[0] - 64] = 0;
-								figyra1[b - 48][str[1] - 64] = 18;
-								this->WhiteRawn8->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-							}
-							cvet = 0;
+							bx = b - 48;
+							by = str[1] - 64;
 						}
-					}
-					FlagShah1 = Shah(bx, by, 1); // шах
-					if (FlagShah1 == 1)
-					{
-						label2->Text = System::Convert::ToString("Неверный ход! Шах сохраняется!");
-						mtemp(); cvet = 1; //вернуть массив
-						bx = temp_bx;
-						by = temp_by;
-					}
-					FlagShah1 = Shah(cx, cy, 0);
-					if (FlagShah1 == 2)
-					{
-						label2->Text = System::Convert::ToString("Шах черному королю!");
-						cvet = 0;
-					}
-				}
-			}
-			else
-			{
-				if (cvet == 0)
-				{
-					label2->Text = System::Convert::ToString("Ход черных");
-					tempm();
-					temp_cx = cx;
-					temp_cy = cy;
-					flag_chek = Chek(cvet, str[0], a - 48, str[1], b - 48);
-					if (flag_chek == 112)
-					{
-						kk = cx = b - 48;
-						ll = cy = str[1] - 64;
-					}
-					if (flag_chek == 5)
-					{
-						label2->Text = System::Convert::ToString("Неверный ход!");
-					}
 
-					else
-					{
-						if ((flag_chek == 0) || (flag_chek == 112))
+						if (flag_chek == 5)
 						{
-							FlagShah1 = Shah(cx, cy, 0);
-							if (FlagShah1 != 2) {
-								proverka_figur(b - 48, str[1] - 64);
-								label3->Text = System::Convert::ToString(label3->Text + yuti1 + "  ");
-								if (figyra1[a - 48][str[0] - 64] == 31) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 31;
-									this->BlackRookL->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								if (figyra1[a - 48][str[0] - 64] == 32) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 32;
-									this->BlackHorseL->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-
-								}
-								if (figyra1[a - 48][str[0] - 64] == 33) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 33;
-									this->BlackElephantL->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								if (figyra1[a - 48][str[0] - 64] == 34) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 34;
-									this->BlackQueen->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								if (figyra1[a - 48][str[0] - 64] == 35) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 35;
-									this->BlackKing->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								if (figyra1[a - 48][str[0] - 64] == 36) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 36;
-									this->BlackElephantR->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								if (figyra1[a - 48][str[0] - 64] == 37) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 37;
-									this->BlackHorseR->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								if (figyra1[a - 48][str[0] - 64] == 38) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 38;
-									this->BlackRookR->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								if (figyra1[a - 48][str[0] - 64] == 21) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 21;
-									this->BlackPawn1->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								if (figyra1[a - 48][str[0] - 64] == 22) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 22;
-									this->BlackPawn2->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								if (figyra1[a - 48][str[0] - 64] == 23) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 23;
-									this->BlackPawn3->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								if (figyra1[a - 48][str[0] - 64] == 24) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 24;
-									this->BlackPawn4->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								if (figyra1[a - 48][str[0] - 64] == 25) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 25;
-									this->BlackPawn5->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								if (figyra1[a - 48][str[0] - 64] == 26) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 26;
-									this->BlackPawn6->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								if (figyra1[a - 48][str[0] - 64] == 27) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 27;
-									this->BlackPawn7->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								if (figyra1[a - 48][str[0] - 64] == 28) {
-									figyra1[a - 48][str[0] - 64] = 0;
-									figyra1[b - 48][str[1] - 64] = 28;
-									this->BlackPawn8->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
-								}
-								cvet = 1;
-							}
-							FlagShah1 = Shah(cx, cy, 0);
-							if (FlagShah1 == 2)
+							label2->Text = System::Convert::ToString("Неверный ход!");
+						}
+						else
+						{
+							if ((flag_chek == 0) || (flag_chek == 111))
 							{
-								label2->Text = System::Convert::ToString("Неверный ход! Шах сохраняется!");
-								mtemp(); cvet = 0;
-								cx = temp_cx;
-								cy = temp_cy;
+								FlagShah1 = Shah(bx, by, 1);
+								if (FlagShah1 != 1)
+								{
+									proverka_figur(b - 48, str[1] - 64);
+									TextLabel->Text = System::Convert::ToString(TextLabel->Text + yuti1 + "  ");
+									if (figyra1[a - 48][str[0] - 64] == 1) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 1;
+										this->WhiteRookL->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									if (figyra1[a - 48][str[0] - 64] == 2) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 2;
+										this->WhiteHorseL->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									if (figyra1[a - 48][str[0] - 64] == 3) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 3;
+										this->WhiteElephantL->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									if (figyra1[a - 48][str[0] - 64] == 4) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 4;
+										this->WhiteQueen->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									if (figyra1[a - 48][str[0] - 64] == 5) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 5;
+										this->WhiteKing->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+
+									}
+									if (figyra1[a - 48][str[0] - 64] == 6) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 6;
+										this->WhiteElephantR->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									if (figyra1[a - 48][str[0] - 64] == 7) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 7;
+										this->WhiteHorseR->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									if (figyra1[a - 48][str[0] - 64] == 8) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 8;
+										this->WhiteRookR->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									if (figyra1[a - 48][str[0] - 64] == 11) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 11;
+										this->WhiteRawn1->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									if (figyra1[a - 48][str[0] - 64] == 12) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 12;
+										this->WhiteRawn2->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									if (figyra1[a - 48][str[0] - 64] == 13) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 13;
+										this->WhiteRawn3->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									if (figyra1[a - 48][str[0] - 64] == 14) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 14;
+										this->WhiteRawn4->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									if (figyra1[a - 48][str[0] - 64] == 15) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 15;
+										this->WhiteRawn5->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									if (figyra1[a - 48][str[0] - 64] == 16) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 16;
+										this->WhiteRawn6->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									if (figyra1[a - 48][str[0] - 64] == 17) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 17;
+										this->WhiteRawn7->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									if (figyra1[a - 48][str[0] - 64] == 18) {
+										figyra1[a - 48][str[0] - 64] = 0;
+										figyra1[b - 48][str[1] - 64] = 18;
+										this->WhiteRawn8->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+									}
+									cvet = 0;
+								}
 							}
 							FlagShah1 = Shah(bx, by, 1);
 							if (FlagShah1 == 1)
 							{
-								label2->Text = System::Convert::ToString("Шах белому королю!");
-								cvet = 1;
+								label2->Text = System::Convert::ToString("Неверный ход! Шах сохраняется!");
+								mtemp(); cvet = 1; 
+								bx = temp_bx;
+								by = temp_by;
+							}
+							FlagShah1 = Shah(cx, cy, 0);
+							if (FlagShah1 == 2)
+							{
+								label2->Text = System::Convert::ToString("Шах черному королю!");
+								cvet = 0;
+							}
+						}
+					}
+					else
+					{
+						if (cvet == 0)
+						{
+							label2->Text = System::Convert::ToString("Ход черных");
+							tempm();
+							temp_cx = cx;
+							temp_cy = cy;
+							flag_chek = Chek(cvet, str[0], a - 48, str[1], b - 48);
+							if (flag_chek == 112)
+							{
+								kk = cx = b - 48;
+								ll = cy = str[1] - 64;
+							}
+							if (flag_chek == 5)
+							{
+								label2->Text = System::Convert::ToString("Неверный ход!");
+							}
+
+							else
+							{
+								if ((flag_chek == 0) || (flag_chek == 112))
+								{
+									FlagShah1 = Shah(cx, cy, 0);
+									if (FlagShah1 != 2) {
+										proverka_figur(b - 48, str[1] - 64);
+										label3->Text = System::Convert::ToString(label3->Text + yuti1 + "  ");
+										if (figyra1[a - 48][str[0] - 64] == 31) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 31;
+											this->BlackRookL->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										if (figyra1[a - 48][str[0] - 64] == 32) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 32;
+											this->BlackHorseL->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+
+										}
+										if (figyra1[a - 48][str[0] - 64] == 33) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 33;
+											this->BlackElephantL->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										if (figyra1[a - 48][str[0] - 64] == 34) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 34;
+											this->BlackQueen->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										if (figyra1[a - 48][str[0] - 64] == 35) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 35;
+											this->BlackKing->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										if (figyra1[a - 48][str[0] - 64] == 36) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 36;
+											this->BlackElephantR->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										if (figyra1[a - 48][str[0] - 64] == 37) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 37;
+											this->BlackHorseR->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										if (figyra1[a - 48][str[0] - 64] == 38) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 38;
+											this->BlackRookR->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										if (figyra1[a - 48][str[0] - 64] == 21) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 21;
+											this->BlackPawn1->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										if (figyra1[a - 48][str[0] - 64] == 22) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 22;
+											this->BlackPawn2->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										if (figyra1[a - 48][str[0] - 64] == 23) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 23;
+											this->BlackPawn3->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										if (figyra1[a - 48][str[0] - 64] == 24) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 24;
+											this->BlackPawn4->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										if (figyra1[a - 48][str[0] - 64] == 25) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 25;
+											this->BlackPawn5->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										if (figyra1[a - 48][str[0] - 64] == 26) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 26;
+											this->BlackPawn6->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										if (figyra1[a - 48][str[0] - 64] == 27) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 27;
+											this->BlackPawn7->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										if (figyra1[a - 48][str[0] - 64] == 28) {
+											figyra1[a - 48][str[0] - 64] = 0;
+											figyra1[b - 48][str[1] - 64] = 28;
+											this->BlackPawn8->Location = System::Drawing::Point(xxx[str[1] - 64][b - 48], yyy[b - 48][str[1] - 64]);
+										}
+										cvet = 1;
+									}
+									FlagShah1 = Shah(cx, cy, 0);
+									if (FlagShah1 == 2)
+									{
+										label2->Text = System::Convert::ToString("Неверный ход! Шах сохраняется!");
+										mtemp(); cvet = 0;
+										cx = temp_cx;
+										cy = temp_cy;
+									}
+									FlagShah1 = Shah(bx, by, 1);
+									if (FlagShah1 == 1)
+									{
+										label2->Text = System::Convert::ToString("Шах белому королю!");
+										cvet = 1;
+									}
+								}
 							}
 						}
 					}
 				}
+				else
+				{
+					label4->Text = System::Convert::ToString("Ввод шагов происходит" + "\n" + "латинскими заглавными буквами и цифрами(4шт)." + " Например: A2A4");
+				}
 			}
+			this->Input->Text = L"";
 		}
 		else
 		{
-			label2->Text = System::Convert::ToString("Ввод шагов происходит" + "\n" + "латинскими заглавными буквами и цифрами(4шт)." + " Например: A2A4");
+
+			if (kk == 4) {
+				this->label4->Text = System::Convert::ToString(L"Ввод шагов происходит" + "\n" + "латинскими заглавными буквами и цифрами(4шт)." + " Например: A2A4");
+			}
+			if ((str[0] >= 'A') && (str[0] <= 'H') && (str[1] >= 'A') && (str[1] <= 'H') && (a >= 49) && (a <= 57) && (b >= 49) && (b <= 57)) {
+				this->label4->Text = System::Convert::ToString(L" ");
+			}
 		}
 	}
-	else
-	{
-		label2->Text = System::Convert::ToString("Ввод шагов происходит" + "\n" + "латинскими заглавными буквами и цифрами(4шт)." + " Например: A2A4");
+
+	private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
+		if ((str[0] == 'D') && (uy == 'R') && (str[1] == 'A') && (uy2 == 'W')) {
+			label2->Text = System::Convert::ToString("Ничья");
+		}
+		if (cvet == 0) {
+			label2->Text = System::Convert::ToString("МАТ черному королю! Победа белых!");
+		}
+		if (cvet == 1) {
+			label2->Text = System::Convert::ToString("МАТ белому королю! Победа чёрных!");
+		}
+		this->Input->MaxLength = 1;
 	}
-}
-private: System::Void NextInput_TextChanged(System::Object^  sender, System::EventArgs^  e) {
-
-	if (cvet == 1) { label2->Text = System::Convert::ToString("Ход белых"); }
-	else { label2->Text = System::Convert::ToString("Ход черных"); }
-}
-
-private: System::Void WhiteRawn8_DoubleClick(System::Object^  sender, System::EventArgs^  e) {
-	this->WhiteRawn8->Location = System::Drawing::Point(184, 184);
-}
-
-private: System::Void WhiteRawn8_MouseUp(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
-}
-private: System::Void WhiteRawn8_LocationChanged(System::Object^  sender, System::EventArgs^  e) {
-
-}
-
-
-private: System::Void WhiteRawn8_DragLeave(System::Object^  sender, System::EventArgs^  e) {
-	this->WhiteRawn8->Location = System::Drawing::Point(184, 184);
-}
-private: System::Void WhiteRawn8_DragEnter(System::Object^  sender, System::Windows::Forms::DragEventArgs^  e) {
-
-}
-private: System::Void button1_DragDrop(System::Object^  sender, System::Windows::Forms::DragEventArgs^  e) {
-	this->WhiteRawn8->Location = System::Drawing::Point(184, 184);
-}
-private: System::Void button1_QueryContinueDrag(System::Object^  sender, System::Windows::Forms::QueryContinueDragEventArgs^  e) {
-}
 };
 }
